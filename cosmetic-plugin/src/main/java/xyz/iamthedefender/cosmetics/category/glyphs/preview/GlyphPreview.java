@@ -48,18 +48,12 @@ public class GlyphPreview extends CosmeticPreview {
 
         sendGlyphParticles(player, previewLocation, selected.getIdentifier());
 
-        PacketContainer cameraPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        cameraPacket.getIntegers().write(0, as.getEntityId());
-
-        PacketContainer resetPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        resetPacket.getIntegers().write(0, player.getEntityId());
-        CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, cameraPacket);
-
+        CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, as);
 
         setOnEnd(player, () -> {
             if (!as.isDead()) as.remove();
 
-            CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, resetPacket);
+            CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, player);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
         });
     }
@@ -98,9 +92,9 @@ public class GlyphPreview extends CosmeticPreview {
         imageParticles.setAnchor(50, 10);
         imageParticles.setDisplayRatio(0.1);
 
-        location.add(0.5, 2, 0.5);
+        Location loc = location.clone().add(0.5, 4.0, 0.5);
 
-        Map<Location, Color> particles = imageParticles.getParticles(location, location.getPitch(), 180.0f);
+        Map<Location, Color> particles = imageParticles.getParticles(loc, loc.getPitch(), 180.0f);
 
         long perIteration = 2L;
         long time = getEndDelay() / perIteration;

@@ -31,20 +31,17 @@ public class ShopKeeperPreview extends CosmeticPreview {
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,
                 100, 2));
 
-        PacketContainer cameraPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        cameraPacket.getIntegers().write(0, as.getEntityId());
+        final Runnable onEnd = ShopKeeperSkinsUtils.spawnShopKeeperNPCForPreview(player, previewLocation, selected.getIdentifier());
 
-        PacketContainer resetPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        resetPacket.getIntegers().write(0, player.getEntityId());
-        CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, cameraPacket);
-
-        ShopKeeperSkinsUtils.spawnShopKeeperNPCForPreview(player, previewLocation, selected.getIdentifier());
+        CosmeticsPlugin.getInstance().getApi().getVersionSupport().sendCameraPacket(player, as);
 
         setOnEnd(player, () -> {
             if (!as.isDead()) as.remove();
 
-            CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, resetPacket);
+            CosmeticsPlugin.getInstance().getApi().getVersionSupport().sendCameraPacket(player, player);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
+
+            if (onEnd != null) onEnd.run();
         });
     }
 }

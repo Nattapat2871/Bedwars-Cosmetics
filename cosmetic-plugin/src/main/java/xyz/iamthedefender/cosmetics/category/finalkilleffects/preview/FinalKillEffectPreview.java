@@ -31,6 +31,7 @@ import xyz.iamthedefender.cosmetics.api.util.ColorUtil;
 import xyz.iamthedefender.cosmetics.api.util.Run;
 import xyz.iamthedefender.cosmetics.api.util.Utility;
 
+import org.bukkit.util.Vector;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -41,56 +42,57 @@ public class FinalKillEffectPreview extends CosmeticPreview {
     public FinalKillEffectPreview() {
         super(CosmeticsType.FinalKillEffects);
     }
+@Override
+public void showPreview(Player player, Cosmetics selected, Location previewLocation, Location playerLocation) throws IllegalArgumentException {
+    handleLocation(player, playerLocation);
 
-    @Override
-    public void showPreview(Player player, Cosmetics selected, Location previewLocation, Location playerLocation) throws IllegalArgumentException {
-        handleLocation(player, playerLocation);
+    ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(playerLocation, EntityType.ARMOR_STAND);
+    as.setVisible(false);
 
-        ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(playerLocation, EntityType.ARMOR_STAND);
-        as.setVisible(false);
+    player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,
+            100, 2));
 
-        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,
-                100, 2));
+    Runnable onEnd = sendKillEffect(player, previewLocation, playerLocation, (FinalKillEffect) selected);
 
-        Runnable onEnd = sendKillEffect(player, previewLocation, (FinalKillEffect) selected);
-
-        PacketContainer cameraPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        cameraPacket.getIntegers().write(0, as.getEntityId());
-
-        PacketContainer resetPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        resetPacket.getIntegers().write(0, player.getEntityId());
-        CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, cameraPacket);
-
+    CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, as);
         setOnEnd(player, () -> {
             if (!as.isDead()) as.remove();
 
-            CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, resetPacket);
+            CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, player);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
 
-            onEnd.run();
+            if (onEnd != null) onEnd.run();
         });
     }
 
-    public Runnable sendKillEffect(Player player, Location location, FinalKillEffect killEffect) {
+    public Runnable sendKillEffect(Player player, Location previewLocation, Location playerLocation, FinalKillEffect killEffect) {
         NPCRegistry registry = CitizensAPI.createAnonymousNPCRegistry(new MemoryNPCDataStore());
 
-        Block block = location.getBlock();
-        Block left = block.getRelative(BlockFace.WEST, 3);
-        Block bottomLeft = left.getRelative(BlockFace.SOUTH, 5);
-        Location leftLocation = left.getLocation().clone();
-        Location bottomLeftLocation = bottomLeft.getLocation().clone();
+        // Calculate relative direction from player to preview point
+        Vector viewDir = previewLocation.toVector().subtract(playerLocation.toVector()).setY(0);
+        if (viewDir.lengthSquared() == 0) viewDir = new Vector(1, 0, 0);
+        viewDir.normalize();
 
-        leftLocation.setX(leftLocation.getBlockX() + 0.5);
-        leftLocation.setZ(leftLocation.getBlockZ() + 0.5);
+        // Calculate "left" vector (rotated 90 degrees CCW)
+        Vector leftDir = new Vector(-viewDir.getZ(), 0, viewDir.getX()).normalize();
 
-        bottomLeftLocation.setX(bottomLeftLocation.getBlockX() + 0.5);
-        bottomLeftLocation.setZ(bottomLeftLocation.getBlockZ() + 0.5);
+        // Victim (Derperino) at center
+        Location victimLoc = previewLocation.clone();
+        victimLoc.setX(victimLoc.getBlockX() + 0.5);
+        victimLoc.setZ(victimLoc.getBlockZ() + 0.5);
+        
+        // Killer (Player NPC) to the left (5 blocks away initially to walk in)
+        Location killerSpawnLoc = victimLoc.clone().add(leftDir.clone().multiply(5));
+        
+        // Final position for killer (2 blocks away from victim)
+        Location killerTargetLoc = victimLoc.clone().add(leftDir.clone().multiply(2));
 
-        NPC victimNPC = registry.createNPC(EntityType.PLAYER, "");
-        NPC derperinoNPC = registry.createNPC(EntityType.PLAYER, "");
+        // Make them face each other
+        killerSpawnLoc.setDirection(victimLoc.toVector().subtract(killerSpawnLoc.toVector()));
+        victimLoc.setDirection(killerSpawnLoc.toVector().subtract(victimLoc.toVector()));
 
-        victimNPC.setName(player.getDisplayName());
-        derperinoNPC.setName(ColorUtil.translate("&7Derperino"));
+        NPC attackerNPC = registry.createNPC(EntityType.PLAYER, player.getDisplayName());
+        NPC victimNPC = registry.createNPC(EntityType.PLAYER, ColorUtil.translate("&7Derperino"));
 
         String[] victimNPCValues = Utility.getFromName(player.getName());
 
@@ -101,40 +103,43 @@ public class FinalKillEffectPreview extends CosmeticPreview {
             String victimNPCValue = victimNPCValues[0];
             String victimNPCSign = victimNPCValues[1];
 
-            victimNPC.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), victimNPCSign, victimNPCValue);
-            victimNPC.getOrAddTrait(SkinTrait.class).setTexture(victimNPCValue, victimNPCSign);
+            attackerNPC.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), victimNPCSign, victimNPCValue);
         }
 
-        derperinoNPC.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), derperinoNPCSign, derperinoNPCValue);
-        derperinoNPC.getOrAddTrait(SkinTrait.class).setTexture(derperinoNPCValue, derperinoNPCSign);
+        victimNPC.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), derperinoNPCSign, derperinoNPCValue);
+
+        attackerNPC.getOrAddTrait(PlayerFilter.class).setAllowlist();
+        attackerNPC.getOrAddTrait(PlayerFilter.class).addPlayer(player.getUniqueId());
+
+        attackerNPC.addTrait(Equipment.class);
+        attackerNPC.getOrAddTrait(Equipment.class).set(Equipment.EquipmentSlot.HAND, new ItemStack(Material.IRON_SWORD));
 
         victimNPC.getOrAddTrait(PlayerFilter.class).setAllowlist();
         victimNPC.getOrAddTrait(PlayerFilter.class).addPlayer(player.getUniqueId());
 
-        victimNPC.addTrait(Equipment.class);
-        victimNPC.getOrAddTrait(Equipment.class).set(Equipment.EquipmentSlot.HAND, new ItemStack(Material.IRON_SWORD));
+        attackerNPC.spawn(killerSpawnLoc);
+        victimNPC.spawn(victimLoc);
 
-        derperinoNPC.getOrAddTrait(PlayerFilter.class).setAllowlist();
-        derperinoNPC.getOrAddTrait(PlayerFilter.class).addPlayer(player.getUniqueId());
+        if (attackerNPC.getEntity() != null) {
+            attackerNPC.getEntity().setMetadata("NPC2", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
+        }
 
-//        victimNPC.getOrAddTrait(Gravity.class).toggle();
-//        derperinoNPC.getOrAddTrait(Gravity.class).toggle();
+        if (victimNPC.getEntity() != null) {
+            victimNPC.getEntity().setMetadata("NPC1", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
+        }
 
-        victimNPC.spawn(bottomLeftLocation);
-        derperinoNPC.spawn(leftLocation);
-        victimNPC.getEntity().setMetadata("NPC2", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
-        derperinoNPC.getEntity().setMetadata("NPC1", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
-        victimNPC.getNavigator().setTarget(derperinoNPC.getEntity(), true);
+        attackerNPC.getNavigator().setTarget(killerTargetLoc);
 
 
         Run.delayed(() -> {
-            derperinoNPC.despawn();
-            killEffect.execute(player, player, leftLocation, false);
+            victimNPC.despawn();
+            killEffect.execute(player, player, victimLoc, false);
         }, 22L);
 
         return () -> {
-            victimNPC.despawn();
-            derperinoNPC.despawn();
+            attackerNPC.destroy();
+            victimNPC.destroy();
+            registry.deregisterAll();
         };
     }
 }

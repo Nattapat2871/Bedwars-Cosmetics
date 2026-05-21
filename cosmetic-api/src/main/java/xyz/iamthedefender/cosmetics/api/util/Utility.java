@@ -107,6 +107,26 @@ public class Utility {
      * @return String[]{texture, signature}
      */
     public static String[] getFromName(String name) {
+        // Try SkinsRestorer first
+        if (Bukkit.getPluginManager().isPluginEnabled("SkinsRestorer")) {
+            try {
+                net.skinsrestorer.api.SkinsRestorer api = net.skinsrestorer.api.SkinsRestorerProvider.get();
+                Player p = Bukkit.getPlayer(name);
+                if (p != null) {
+                    java.util.Optional<net.skinsrestorer.api.property.SkinProperty> skin = api.getPlayerStorage().getSkinOfPlayer(p.getUniqueId());
+                    if (skin.isPresent()) {
+                        return new String[]{skin.get().getValue(), skin.get().getSignature()};
+                    }
+                } else {
+                    // Try by name for offline players
+                    java.util.Optional<net.skinsrestorer.api.property.InputDataResult> skin = api.getSkinStorage().findSkinData(name);
+                    if (skin.isPresent()) {
+                        return new String[]{skin.get().getProperty().getValue(), skin.get().getProperty().getSignature()};
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
         try {
             URL url_0 = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
             InputStreamReader reader_0 = new InputStreamReader(url_0.openStream());

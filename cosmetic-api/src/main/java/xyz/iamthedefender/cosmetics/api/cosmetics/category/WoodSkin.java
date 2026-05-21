@@ -56,7 +56,7 @@ public abstract class WoodSkin extends Cosmetics {
         List<String> finalLore = new ArrayList<>();
         finalLore.addAll(Arrays.asList("&8Wood Skin", ""));
         finalLore.addAll(getLore());
-        finalLore.addAll(Arrays.asList("", "&7Rarity: {rarity}","&7Cost: &6{cost}", "", "{status}"));
+        finalLore.addAll(Arrays.asList("", "&7Rarity: {rarity}","&7Cost: &6{cost}", "", "&7Unlocked: &a{owned}", "", "{status}"));
 
         saveIfNotExistsLang("cosmetics." + configPath + "lore", finalLore);
         Utility.getApi().getWoodSkinList().add(this);

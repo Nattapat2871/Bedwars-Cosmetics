@@ -18,6 +18,8 @@ import xyz.iamthedefender.cosmetics.api.configuration.ConfigManager;
 import xyz.iamthedefender.cosmetics.api.cosmetics.CosmeticsType;
 import xyz.iamthedefender.cosmetics.api.util.Utility;
 import xyz.iamthedefender.cosmetics.api.util.config.ConfigUtils;
+import com.cryptomorin.xseries.profiles.builder.XSkull;
+import com.cryptomorin.xseries.profiles.objects.Profileable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,31 +45,28 @@ public class ShopKeeperSkinsUtils {
     /**
      * This creates an entity NPC but with a timer.
      * */
-    private static void createEntityNPC(final Player p,final EntityType ent, final Location loc, int ticks) {
+    private static Runnable createEntityNPC(final Player p,final EntityType ent, final Location loc, int ticks) {
         NPCRegistry registry = CitizensAPI.createAnonymousNPCRegistry(new MemoryNPCDataStore());
         NPC npc = registry.createNPC(ent, "");
         npc.setBukkitEntityType(ent);
         npc.getOrAddTrait(PlayerFilter.class).setAllowlist();
         npc.getOrAddTrait(PlayerFilter.class).addPlayer(p.getUniqueId());
 
-        npc.spawn(loc);
+        boolean spawned = npc.spawn(loc);
+        if (!spawned) {
+            CosmeticsPlugin.getInstance().getLogger().warning("Citizens failed to spawn NPC of type " + ent + " at " + loc);
+        }
+
         npc.data().setPersistent(NPC.Metadata.NAMEPLATE_VISIBLE, false);
         npc.data().setPersistent(NPC.Metadata.DEATH_SOUND, "");
         npc.data().setPersistent(NPC.Metadata.AMBIENT_SOUND, "");
         npc.data().setPersistent(NPC.Metadata.HURT_SOUND, "");
         npc.data().setPersistent(NPC.Metadata.SILENT, true);
 
-        new BukkitRunnable() {
-            int tick = ticks;
-            @Override
-            public void run() {
-                if (tick == 0){
-                    npc.despawn();
-                    cancel();
-                }
-                tick--;
-            }
-        }.runTaskTimer(CosmeticsPlugin.getInstance(), 0, 20);
+        return () -> {
+            npc.destroy();
+            registry.deregisterAll();
+        };
     }
 
     /**
@@ -75,24 +74,29 @@ public class ShopKeeperSkinsUtils {
      * When playing in game.
      * */
     private static void createShopKeeperNPC(Player p, Location loc, String value, String sign, Boolean mirror) {
-        if (mirror) {
-            List<String> values = Arrays.asList(Objects.requireNonNull(Utility.getFromName(p.getName())));
-            value = values.get(0);
-            sign = values.get(1);
-        }
         NPCRegistry registry = CitizensAPI.createAnonymousNPCRegistry(new MemoryNPCDataStore());
 
         // Shop NPC
         NPC npc = registry.createNPC(EntityType.PLAYER, "");
         npc.setName("&r");
 
-        npc.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), sign, value);
+        if (mirror) {
+            npc.getOrAddTrait(SkinTrait.class).setSkinName(p.getName(), true);
+        } else {
+            npc.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), sign, value);
+        }
 
         npc.getTrait(LookClose.class).lookClose(getLookClose());
         npc.getOrAddTrait(HologramTrait.class).clear();
-        npc.spawn(loc);
-        npc.getEntity().setMetadata("NPC2", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
-        npc.getEntity().setMetadata("shop_entity_cosmetics", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
+        boolean spawned = npc.spawn(loc);
+        if (!spawned) {
+            CosmeticsPlugin.getInstance().getLogger().warning("Citizens failed to spawn shopkeeper NPC at " + loc);
+        }
+
+        if (npc.getEntity() != null) {
+            npc.getEntity().setMetadata("NPC2", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
+            npc.getEntity().setMetadata("shop_entity_cosmetics", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
+        }
         npc.data().setPersistent(NPC.Metadata.DEATH_SOUND, "");
         npc.data().setPersistent(NPC.Metadata.AMBIENT_SOUND, "");
         npc.data().setPersistent(NPC.Metadata.HURT_SOUND, "");
@@ -103,39 +107,37 @@ public class ShopKeeperSkinsUtils {
      * This method should only be used
      * When sending a preview.
      * */
-    private static void createShopKeeperNPC(Player p, Location loc, String value, String sign, Boolean mirror, int ticks) {
-        // mirror skin
-        if (mirror) {
-            List<String> values = Arrays.asList(Objects.requireNonNull(Utility.getFromName(p.getName())));
-            value = values.get(0);
-            sign = values.get(1);
-        }
+    private static Runnable createShopKeeperNPC(Player p, Location loc, String value, String sign, Boolean mirror, int ticks) {
         NPCRegistry registry = CitizensAPI.createAnonymousNPCRegistry(new MemoryNPCDataStore());
         // Shop NPC
         NPC npc = registry.createNPC(EntityType.PLAYER, "");
         npc.setName("&r");
-        npc.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), sign, value);
-        npc.getOrAddTrait(SkinTrait.class).setTexture(value, sign);
+        
         npc.getOrAddTrait(HologramTrait.class).clear();
 
         npc.getOrAddTrait(PlayerFilter.class).setAllowlist();
         npc.getOrAddTrait(PlayerFilter.class).addPlayer(p.getUniqueId());
 
-        npc.spawn(loc);
-        npc.getEntity().setMetadata("NPC2", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
-        npc.getEntity().setMetadata("shop_entity_cosmetics", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
+        boolean spawned = npc.spawn(loc);
+        if (!spawned) {
+            CosmeticsPlugin.getInstance().getLogger().warning("Citizens failed to spawn shopkeeper NPC at " + loc);
+        }
 
-        new BukkitRunnable() {
-            int tick = ticks;
-            @Override
-            public void run() {
-                if (tick == 0){
-                    npc.despawn();
-                    cancel();
-                }
-                tick--;
-            }
-        }.runTaskTimer(CosmeticsPlugin.getInstance(), 0, 20);
+        if (mirror) {
+            npc.getOrAddTrait(SkinTrait.class).setSkinName(p.getName(), true);
+        } else {
+            npc.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), sign, value);
+        }
+
+        if (npc.getEntity() != null) {
+            npc.getEntity().setMetadata("NPC2", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
+            npc.getEntity().setMetadata("shop_entity_cosmetics", new FixedMetadataValue(CosmeticsPlugin.getInstance(), ""));
+        }
+
+        return () -> {
+            npc.destroy();
+            registry.deregisterAll();
+        };
     }
 
 
@@ -187,8 +189,7 @@ public class ShopKeeperSkinsUtils {
         }
     }
 
-    public static void spawnShopKeeperNPCForPreview(Player p, Location loc, String skin) {
-        CosmeticsPlugin plugin = CosmeticsPlugin.getInstance();
+    public static Runnable spawnShopKeeperNPCForPreview(Player p, Location loc, String skin) {
         ConfigManager config = ConfigUtils.getShopKeeperSkins();
         String key = CosmeticsType.ShopKeeperSkins.getSectionKey();
         String skinvalue = config.getString(key + "." + skin + ".skin-value");
@@ -197,14 +198,14 @@ public class ShopKeeperSkinsUtils {
         boolean mirror = config.getBoolean(key + "." + skin + ".mirror");
 
         if (mirror){
-            createShopKeeperNPC(p, loc, skinvalue, skinsign, true, 5);
-            return;
+            return createShopKeeperNPC(p, loc, skinvalue, skinsign, true, 5);
         }
         if (etype != null) {
-            createEntityNPC(p, EntityType.valueOf(etype), loc, 5);
+            return createEntityNPC(p, EntityType.valueOf(etype), loc, 5);
         }else if (skinvalue != null && skinsign != null) {
-            createShopKeeperNPC(p, loc, skinvalue, skinsign, false, 5);
+            return createShopKeeperNPC(p, loc, skinvalue, skinsign, false, 5);
         }
+        return () -> {};
     }
 
     private static boolean getLookClose() {

@@ -68,15 +68,20 @@ public class SpraysUtil
             CustomRenderer renderer = new CustomRenderer();
 
             // Can't use Object.toString() here, as values can be null!
-            String sprayUrl = String.valueOf(selectedSpray.getField(FieldsType.URL, player));
-            String sprayFile = String.valueOf(selectedSpray.getField(FieldsType.FILE, player));
+            Object urlField = selectedSpray.getField(FieldsType.URL, player);
+            Object fileField = selectedSpray.getField(FieldsType.FILE, player);
+            
+            String sprayUrl = urlField != null ? String.valueOf(urlField) : null;
+            String sprayFile = fileField != null ? String.valueOf(fileField) : null;
 
             DebugUtil.addMessage("Playing " + selectedSpray.getIdentifier() + " Spray for " + player.getDisplayName());
 
             if (sprayFile == null) {
-                sprayFile = selectedSpray.getIdentifier() + "." + FileUtil.getFileExtension(sprayUrl);
-            } else {
-                sprayFile = String.valueOf(selectedSpray.getField(FieldsType.FILE, player));
+                if (sprayUrl != null) {
+                    sprayFile = selectedSpray.getIdentifier() + "." + FileUtil.getFileExtension(sprayUrl);
+                } else {
+                    sprayFile = selectedSpray.getIdentifier() + ".png";
+                }
             }
 
 

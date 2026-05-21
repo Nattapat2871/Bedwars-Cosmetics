@@ -20,6 +20,7 @@ import xyz.iamthedefender.cosmetics.api.cosmetics.category.ShopKeeperSkin;
 import xyz.iamthedefender.cosmetics.api.handler.HandlerType;
 import xyz.iamthedefender.cosmetics.api.handler.IHandler;
 import xyz.iamthedefender.cosmetics.api.util.Run;
+import xyz.iamthedefender.cosmetics.support.bedwars.handler.bedwars2023.BW2023Handler;
 import xyz.iamthedefender.cosmetics.util.DebugUtil;
 import xyz.iamthedefender.cosmetics.util.MathUtil;
 import xyz.iamthedefender.cosmetics.util.StartupUtils;
@@ -37,7 +38,7 @@ public class ShopKeeperHandler2023 implements Listener {
         if (!isShopkeepersEnabled) return;
 
         if (event.getNewState().name().equals("playing")) {
-            ShopKeeperHandler1058.arenas.put(event.getArena().getWorldName(), true);
+            BW2023Handler.arenas.put(event.getArena().getWorldName(), true);
             List<ITeam> teams = event.getArena().getTeams();
             DebugUtil.addMessage("Executing ShopKeeper Skins for arena " + event.getArena().getArenaName());
             new BukkitRunnable() {
@@ -121,6 +122,6 @@ public class ShopKeeperHandler2023 implements Listener {
 
         String name = e.getArena().getWorldName();
 
-        Run.delayed(() -> ShopKeeperHandler1058.arenas.remove(name), 300L);
+        Run.delayed(() -> BW2023Handler.arenas.remove(name), 300L);
     }
 }

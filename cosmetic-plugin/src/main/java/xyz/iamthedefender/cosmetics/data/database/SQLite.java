@@ -95,6 +95,11 @@ public class SQLite implements IDatabase {
                         "victory_dance INT," +
                         "wood_skin INT" +
                         ")");
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS cosmetics_ownership (" +
+                        "uuid TEXT," +
+                        "cosmetic_id TEXT," +
+                        "PRIMARY KEY (uuid, cosmetic_id)" +
+                        ")");
             } catch (SQLException e) {
                 Bukkit.getLogger().severe("Failed to create player-data table: " + e.getMessage());
             }

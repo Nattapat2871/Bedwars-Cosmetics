@@ -9,7 +9,7 @@ import java.util.Locale;
 public class StringUtils {
 
 
-    public static List<String> formatLore(List<String> lores, String name, int price, String status, String rarity){
+    public static List<String> formatLore(List<String> lores, String name, int price, String status, String rarity, String ownedCount){
         DecimalFormat decimalFormat = new DecimalFormat();
         decimalFormat.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US));
 
@@ -26,8 +26,15 @@ public class StringUtils {
             if (lores.get(i).contains("{rarity}")){
                 lores.set(i, lores.get(i).replace("{rarity}", rarity));
             }
+            if (lores.get(i).contains("{owned}")){
+                lores.set(i, lores.get(i).replace("{owned}", ownedCount));
+            }
         }
         return new ArrayList<>(lores);
+    }
+
+    public static List<String> formatLore(List<String> lores, String name, int price, String status, String rarity){
+        return formatLore(lores, name, price, status, rarity, "");
     }
     public static String replaceHyphensAndCaptalizeFirstLetter(String str) {
         if (str == null){

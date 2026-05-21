@@ -39,11 +39,6 @@ public class SprayPreview extends CosmeticPreview {
 
     private final Map<UUID, Map<Integer, org.bukkit.inventory.ItemStack>> inventories = new HashMap<>();
 
-    private ItemFrame frame;
-    private MapView view;
-
-    private PacketAdapter adapter;
-
     public SprayPreview() {
         super(CosmeticsType.Sprays);
     }
@@ -65,7 +60,7 @@ public class SprayPreview extends CosmeticPreview {
 
         handleLocation(player, playerLocation);
 
-        ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(playerLocation, EntityType.ARMOR_STAND);
+        final ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(playerLocation, EntityType.ARMOR_STAND);
         as.setVisible(false);
 
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,
@@ -73,70 +68,17 @@ public class SprayPreview extends CosmeticPreview {
 
         for (Player player1 : Bukkit.getOnlinePlayers()) {
             if (player1.equals(player)) continue;
-
             player1.hidePlayer(player);
         }
 
-        sendFrame(player, selected, playerLocation);
-
-        PacketContainer cameraPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        cameraPacket.getIntegers().write(0, as.getEntityId());
-
-        PacketContainer resetPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        resetPacket.getIntegers().write(0, player.getEntityId());
-        CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, cameraPacket);
-
-
-        setOnEnd(player, () -> {
-            if (!as.isDead()) as.remove();
-
-            frame.setItem(new ItemStack(Material.AIR));
-            frame.remove();
-            CosmeticsPlugin.getInstance().getProtocolManager().removePacketListener(adapter);
-            CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, resetPacket);
-            player.removePotionEffect(PotionEffectType.INVISIBILITY);
-        });
-    }
-
-    public void sendFrame(Player player, Cosmetics selected, Location playerLocation) {
-        view = Bukkit.createMap(player.getWorld());
-        playerLocation = playerLocation.clone();
-
-        /* Old spray preview code
-        CustomRenderer renderer = new CustomRenderer();
-        ConfigManager config = ConfigUtils.getSprays();
-
-        String sprayFile = config.getString(CosmeticsType.Sprays.getSectionKey() + "." + selected + ".file");
-        String sprayURL = config.getString(CosmeticsType.Sprays.getSectionKey() + "." + selected + ".url");
-        if (sprayFile == null) {
-            if (!renderer.load(sprayURL)) {
-                player.sendMessage(ColorUtil.translate("&cLooks like there's an error rendering the Spray, contact the admin!"));
-                Logger.getLogger("Minecraft").log(Level.SEVERE, "Could not load the URL for the " + selected + " Check if the URL in Sprays.yml is valid!");
-                return;
-            }
-        } else {
-            File file = new File(Cosmetics.getInstance().getHandler().getAddonPath() + "/" + Cosmetics.getInstance().getConfig().getString("Spray-Dir") + "/" + sprayFile);
-            if (!renderer.load(file)) {
-                player.sendMessage(ColorUtil.translate("&cLooks like there's an error rendering the Spray, contact the admin!"));
-                Logger.getLogger("Minecraft").log(Level.SEVERE, "Could not load the File for the " + selected + " Check if the File in Sprays.yml is valid!");
-                Logger.getLogger("Minecraft").log(Level.SEVERE, "FilePath: " + file.getAbsolutePath());
-                return;
-            }
-        }
-
-        view.addRenderer(renderer);
-         */
-
-
-
-        playerLocation.setPitch(0);
-        playerLocation.add(0, 1.5, 0);
-        Location firstBlock = playerLocation.clone().add(playerLocation.getDirection().multiply(2));
+        Location eyeLocation = playerLocation.clone().add(0, 1.6, 0);
+        Location firstBlock = eyeLocation.clone().add(playerLocation.getDirection().multiply(2));
         firstBlock.getBlock().setType(Material.BARRIER);
         firstBlock.getChunk().load(true);
-        frame = (ItemFrame) player.getWorld().spawnEntity(firstBlock.getBlock().getRelative(getCardinalDirection(playerLocation).getOppositeFace()).getLocation(), EntityType.ITEM_FRAME);
+        
+        final ItemFrame frame = (ItemFrame) player.getWorld().spawnEntity(firstBlock.getBlock().getRelative(getCardinalDirection(playerLocation).getOppositeFace()).getLocation(), EntityType.ITEM_FRAME);
 
-        adapter = new PacketAdapter(CosmeticsPlugin.getInstance(), PacketType.Play.Server.SPAWN_ENTITY) {
+        final PacketAdapter adapter = new PacketAdapter(CosmeticsPlugin.getInstance(), PacketType.Play.Server.SPAWN_ENTITY) {
             @Override
             public void onPacketSending(PacketEvent event) {
                 if (event.getPacket().getIntegers().read(0) == frame.getEntityId() &&
@@ -152,12 +94,20 @@ public class SprayPreview extends CosmeticPreview {
 
         XSound.ENTITY_SILVERFISH_HURT.play(player, 10f, 10f);
 
-        Run.every((r) -> {
-            if(frame.isDead() || !frame.isValid()){
-                firstBlock.getBlock().setType(Material.AIR);
-                r.cancel();
+        CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, as);
+
+        setOnEnd(player, () -> {
+            if (!as.isDead()) as.remove();
+
+            if (frame.isValid()) {
+                frame.setItem(new ItemStack(Material.AIR));
+                frame.remove();
             }
-        }, 10L);
+            firstBlock.getBlock().setType(Material.AIR);
+            CosmeticsPlugin.getInstance().getProtocolManager().removePacketListener(adapter);
+            CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, player);
+            player.removePotionEffect(PotionEffectType.INVISIBILITY);
+        });
     }
 
     public static BlockFace getCardinalDirection(Location location) {

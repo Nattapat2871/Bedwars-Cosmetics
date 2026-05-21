@@ -81,13 +81,13 @@ public class SquidMissleEffect extends FinalKillEffect {
 
                     victim.playSound(victim.getLocation(), XSound.ENTITY_CHICKEN_EGG.parseSound(), 1.0f, 1.0f);
                     if (this.i1 == 25) {
-                        ItemStack stackFirework = new ItemStack(Material.FIREWORK);
+                        ItemStack stackFirework = new ItemStack(Material.FIREWORK_ROCKET);
                         FireworkMeta fireworkMeta = (FireworkMeta) stackFirework.getItemMeta();
                         fireworkMeta.addEffect(FireworkEffect.builder().flicker(true).trail(false).with(FireworkEffect.Type.BALL).withColor(Color.BLACK).withFade(Color.BLACK).build());
                         fireworkMeta.setPower(1);
                         stackFirework.setItemMeta(fireworkMeta);
 
-                        Firework fw = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK);
+                        Firework fw = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK_ROCKET);
                         fw.setFireworkMeta(fireworkMeta);
                         fw.detonate();
                         fireworkID = fw.getEntityId();

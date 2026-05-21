@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import xyz.iamthedefender.cosmetics.CosmeticsPlugin;
+import xyz.iamthedefender.cosmetics.api.cosmetics.Cosmetics;
 import xyz.iamthedefender.cosmetics.api.cosmetics.CosmeticsType;
 import xyz.iamthedefender.cosmetics.api.cosmetics.category.*;
 import xyz.iamthedefender.cosmetics.util.StartupUtils;
@@ -14,6 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -97,91 +100,36 @@ public class PlayerOwnedData{
         }
     }
 
-
+    private int calculateOwned(CosmeticsType type, List<? extends Cosmetics> list) {
+        Player p = Bukkit.getPlayer(uuid);
+        int count = 0;
+        for (Cosmetics cosmetic : list) {
+            if (OwnershipManager.hasOwnership(uuid, cosmetic.getIdentifier())) {
+                count++;
+                continue;
+            }
+            if (p != null) {
+                if (p.hasPermission(type.getPermissionFormat() + ".*") || p.hasPermission(type.getPermissionFormat() + "." + cosmetic.getIdentifier())) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
 
     public void updateOwned(){
-        setBedDestroy(0);
-        setDeathCry(0);
-        setFinalKillEffect(0);
-        setGlyph(0);
-        setIslandTopper(0);
-        setKillMessage(0);
-        setProjectileTrail(0);
-        setShopkeeperSkin(0);
-        setSpray(0);
-        setVictoryDance(0);
-        setWoodSkin(0);
-        for (BedDestroy destroy : StartupUtils.bedDestroyList) {
-            if (Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.BedBreakEffects.getPermissionFormat() + "." + destroy.getIdentifier())
-            || Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.BedBreakEffects.getPermissionFormat() + ".*")) {
-                this.setBedDestroy(this.getBedDestroy() + 1);
-            }
-        }
-        for (DeathCry deathCr : StartupUtils.deathCryList) {
-            if (Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.DeathCries.getPermissionFormat() + "." + deathCr.getIdentifier())
-                    || Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.DeathCries.getPermissionFormat() + ".*") ){
-                this.setDeathCry(this.getDeathCry() + 1);
-            }
-        }
-        for (FinalKillEffect killEffect : StartupUtils.finalKillList) {
-            if (Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.FinalKillEffects.getPermissionFormat() + "." + killEffect.getIdentifier())
-                    || Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.FinalKillEffects.getPermissionFormat() + ".*") ){
-                this.setFinalKillEffect(this.getFinalKillEffect() + 1);
-            }
-        }
-        for (Glyph glyph : StartupUtils.glyphsList) {
-            if (Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.Glyphs.getPermissionFormat() + "." + glyph.getIdentifier())
-                    || Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.Glyphs.getPermissionFormat() + ".*") ){
-                this.setGlyph(this.getGlyph() + 1);
-            }
-        }
-        for (IslandTopper topper : StartupUtils.islandTopperList) {
-            if (Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.IslandToppers.getPermissionFormat() + "." + topper.getIdentifier())
-                    || Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.IslandToppers.getPermissionFormat() + ".*")) {
-                this.setIslandTopper(this.getIslandTopper() + 1);
-            }
-        }
-        for (KillMessage message : StartupUtils.killMessageList) {
-            if (Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.KillMessages.getPermissionFormat() + "." + message.getIdentifier())
-                    || Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.KillMessages.getPermissionFormat() + ".*")) {
-                this.setKillMessage(this.getKillMessage() + 1);
-            }
-        }
-
-
-        for (ProjectileTrail trail : StartupUtils.projectileTrailList) {
-            if (Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.ProjectileTrails.getPermissionFormat() + "." + trail.getIdentifier())
-                    || Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.ProjectileTrails.getPermissionFormat() + ".*")) {
-                this.setProjectileTrail(this.getProjectileTrail() + 1);
-            }
-        }
-
-        for (ShopKeeperSkin shopKeeperSkin : StartupUtils.shopKeeperSkinList) {
-            if (Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.ShopKeeperSkins.getPermissionFormat() + "." + shopKeeperSkin.getIdentifier())
-                    || Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.BedBreakEffects.getPermissionFormat() + ".*") ){
-                this.setShopkeeperSkin(this.getShopkeeperSkin() + 1);
-            }
-        }
-
-        for (Spray spray1 : StartupUtils.sprayList) {
-            if (Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.Sprays.getPermissionFormat() + "." + spray1.getIdentifier())
-            || Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.Sprays.getPermissionFormat() + ".*")){
-                this.setSpray(this.getSpray() + 1);
-            }
-        }
-
-        for (VictoryDance dance : StartupUtils.victoryDancesList) {
-            if (Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.VictoryDances.getPermissionFormat() + "." + dance.getIdentifier())
-                    || Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.VictoryDances.getPermissionFormat() + ".*")) {
-                this.setVictoryDance(this.getVictoryDance() + 1);
-            }
-        }
-
-        for (WoodSkin skin : StartupUtils.woodSkinsList) {
-            if (Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.WoodSkins.getPermissionFormat() + "." + skin.getIdentifier())
-                    || Bukkit.getPlayer(uuid).hasPermission(CosmeticsType.WoodSkins.getPermissionFormat() + ".*")) {
-                this.setWoodSkin(this.getWoodSkin() + 1);
-            }
-        }
+        setBedDestroy(calculateOwned(CosmeticsType.BedBreakEffects, StartupUtils.bedDestroyList));
+        setDeathCry(calculateOwned(CosmeticsType.DeathCries, StartupUtils.deathCryList));
+        setFinalKillEffect(calculateOwned(CosmeticsType.FinalKillEffects, StartupUtils.finalKillList));
+        setGlyph(calculateOwned(CosmeticsType.Glyphs, StartupUtils.glyphsList));
+        setIslandTopper(calculateOwned(CosmeticsType.IslandToppers, StartupUtils.islandTopperList));
+        setKillMessage(calculateOwned(CosmeticsType.KillMessages, StartupUtils.killMessageList));
+        setProjectileTrail(calculateOwned(CosmeticsType.ProjectileTrails, StartupUtils.projectileTrailList));
+        setShopkeeperSkin(calculateOwned(CosmeticsType.ShopKeeperSkins, StartupUtils.shopKeeperSkinList));
+        setSpray(calculateOwned(CosmeticsType.Sprays, StartupUtils.sprayList));
+        setVictoryDance(calculateOwned(CosmeticsType.VictoryDances, StartupUtils.victoryDancesList));
+        setWoodSkin(calculateOwned(CosmeticsType.WoodSkins, StartupUtils.woodSkinsList));
+        
+        save();
     }
 }

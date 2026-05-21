@@ -21,7 +21,7 @@ public class IslandToppersUtil {
             if (arena != null) {
                 Block block = arena.getTeam(p).getBed().getBlock();
 
-                if (block.getType() == Material.BED_BLOCK) {
+                if (block.getType() == com.cryptomorin.xseries.XMaterial.RED_BED.parseMaterial()) {
                     if (block.getState().getData() instanceof Directional) {
                         Directional directional = (Directional) block.getState().getData();
                         CosmeticsPlugin.getInstance().getWorldEditHandler().pasteSchematic(

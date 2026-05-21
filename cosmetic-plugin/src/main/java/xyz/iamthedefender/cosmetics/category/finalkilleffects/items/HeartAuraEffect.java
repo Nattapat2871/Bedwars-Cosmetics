@@ -51,6 +51,7 @@ public class HeartAuraEffect extends FinalKillEffect {
 
     @Override
     public void execute(Player killer, Player victim, Location location, boolean onlyVictim) {
+        com.cryptomorin.xseries.XSound.BLOCK_AMETHYST_BLOCK_CHIME.play(location, 1.0f, 1.0f);
         sendParticles(victim, location, onlyVictim);
     }
 

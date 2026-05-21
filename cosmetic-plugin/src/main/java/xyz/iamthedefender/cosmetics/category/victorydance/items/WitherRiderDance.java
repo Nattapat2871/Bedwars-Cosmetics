@@ -16,7 +16,7 @@ import xyz.iamthedefender.cosmetics.CosmeticsPlugin;
 import xyz.iamthedefender.cosmetics.api.cosmetics.RarityType;
 import xyz.iamthedefender.cosmetics.api.cosmetics.category.VictoryDance;
 import xyz.iamthedefender.cosmetics.api.util.Run;
-import xyz.iamthedefender.cosmetics.category.shopkeeperskins.ShopKeeperHandler1058;
+import xyz.iamthedefender.cosmetics.support.bedwars.handler.bedwars2023.BW2023Handler;
 
 import java.util.List;
 
@@ -67,7 +67,7 @@ public class WitherRiderDance extends VictoryDance implements Listener {
         addEntity(winner, wither);
 
         addTask(winner, Run.every(r -> {
-            if(!ShopKeeperHandler1058.arenas.containsKey(winner.getWorld().getName())) {
+            if(!BW2023Handler.arenas.containsKey(winner.getWorld().getName())) {
                 wither.remove();
                 r.cancel();
                 return;

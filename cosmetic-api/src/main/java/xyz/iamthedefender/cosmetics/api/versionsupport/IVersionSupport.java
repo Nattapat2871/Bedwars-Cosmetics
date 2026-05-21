@@ -39,6 +39,8 @@ public interface IVersionSupport {
 
     void displayParticle(Player player, Location location, ParticleWrapper particle, int count, float speed, Vector offset);
 
+    void sendCameraPacket(Player player, org.bukkit.entity.Entity entity);
+
     default void displayParticle(Player player, Location location, ParticleWrapper particle, int count, float speed, float offsetX, float offsetY, float offsetZ) {
         displayParticle(player, location, particle, count, speed, new Vector(offsetX, offsetY, offsetZ));
     }

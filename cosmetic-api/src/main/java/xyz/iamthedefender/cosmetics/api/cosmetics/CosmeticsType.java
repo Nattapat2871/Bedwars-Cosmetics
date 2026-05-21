@@ -11,17 +11,17 @@ import java.util.List;
 
 @Getter
 public enum CosmeticsType {
-    FinalKillEffects("Final Kill Effect", ConfigUtils.getFinalKillEffects(), Utility.getApi().getFinalKillList(), "finalkill-effect", "finalkilleffect", FinalKillEffect.class),
-    ProjectileTrails("Projectile Trail", ConfigUtils.getProjectileTrails(), Utility.getApi().getProjectileTrailList(), "projectile-trails", "projectiletrail", ProjectileTrail.class),
-    BedBreakEffects("Bed Destroy", ConfigUtils.getBedDestroys(), Utility.getApi().getBedDestroyList(), "bed-destroy", "beddestroy", BedDestroy.class),
-    Glyphs("Glyph", ConfigUtils.getGlyphs(), Utility.getApi().getGlyphsList(), "glyph", "glyph", Glyph.class),
-    DeathCries("Death Cry", ConfigUtils.getDeathCries(), Utility.getApi().getDeathCryList(), "death-cry", "deathcry", DeathCry.class),
-    VictoryDances("Victory Dance", ConfigUtils.getVictoryDances(), Utility.getApi().getVictoryDanceList(), "victory-dance", "victorydance", VictoryDance.class),
-    WoodSkins("Wood Skin", ConfigUtils.getWoodSkins(), Utility.getApi().getWoodSkinList(), "wood-skins", "woodskin", WoodSkin.class),
-    Sprays("Spray", ConfigUtils.getSprays(), Utility.getApi().getSprayList(), "sprays", "spray", Spray.class),
-    KillMessages("Kill Message", ConfigUtils.getKillMessages(), Utility.getApi().getKillMessageList(), "kill-message", "killmessage", KillMessage.class),
-    ShopKeeperSkins("ShopKeeper Skin", ConfigUtils.getShopKeeperSkins(), Utility.getApi().getShopKeeperSkinList(), "shopkeeper-skins", "shopkeeperskin", ShopKeeperSkin.class),
-    IslandToppers("Island Topper", ConfigUtils.getIslandToppers(), Utility.getApi().getIslandTopperList(), "island-topper", "islandtopper", IslandTopper.class);
+    FinalKillEffects("Final Kill Effect", ConfigUtils.getFinalKillEffects(), Utility.getApi().getFinalKillList(), "finalkill-effect", "cosmetics.finalkilleffect", FinalKillEffect.class),
+    ProjectileTrails("Projectile Trail", ConfigUtils.getProjectileTrails(), Utility.getApi().getProjectileTrailList(), "projectile-trails", "cosmetics.projectiletrail", ProjectileTrail.class),
+    BedBreakEffects("Bed Destroy", ConfigUtils.getBedDestroys(), Utility.getApi().getBedDestroyList(), "bed-destroy", "cosmetics.beddestroy", BedDestroy.class),
+    Glyphs("Glyph", ConfigUtils.getGlyphs(), Utility.getApi().getGlyphsList(), "glyph", "cosmetics.glyph", Glyph.class),
+    DeathCries("Death Cry", ConfigUtils.getDeathCries(), Utility.getApi().getDeathCryList(), "death-cry", "cosmetics.deathcry", DeathCry.class),
+    VictoryDances("Victory Dance", ConfigUtils.getVictoryDances(), Utility.getApi().getVictoryDanceList(), "victory-dance", "cosmetics.victorydance", VictoryDance.class),
+    WoodSkins("Wood Skin", ConfigUtils.getWoodSkins(), Utility.getApi().getWoodSkinList(), "wood-skins", "cosmetics.woodskin", WoodSkin.class),
+    Sprays("Spray", ConfigUtils.getSprays(), Utility.getApi().getSprayList(), "sprays", "cosmetics.spray", Spray.class),
+    KillMessages("Kill Message", ConfigUtils.getKillMessages(), Utility.getApi().getKillMessageList(), "kill-message", "cosmetics.killmessage", KillMessage.class),
+    ShopKeeperSkins("ShopKeeper Skin", ConfigUtils.getShopKeeperSkins(), Utility.getApi().getShopKeeperSkinList(), "shopkeeper-skins", "cosmetics.shopkeeperskin", ShopKeeperSkin.class),
+    IslandToppers("Island Topper", ConfigUtils.getIslandToppers(), Utility.getApi().getIslandTopperList(), "island-topper", "cosmetics.islandtopper", IslandTopper.class);
 
     private final String formatedName;
     private final ConfigManager configManager;
@@ -44,10 +44,25 @@ public enum CosmeticsType {
     }
 
     public static CosmeticsType fromName(String name) {
+        if (name == null) return null;
+        String sanitized = name.toLowerCase().replace("-", "").replace("_", "").replace(" ", "");
         for (CosmeticsType type : values()) {
-            if (type.name().replace("-", "").replace("_", "").equalsIgnoreCase(name)) {
+            if (type.name().toLowerCase().replace("-", "").replace("_", "").replace(" ", "").equals(sanitized)) {
                 return type;
             }
+            if (type.getSectionKey().toLowerCase().replace("-", "").replace("_", "").replace(" ", "").equals(sanitized)) {
+                return type;
+            }
+        }
+        // Specific aliases
+        if (sanitized.equalsIgnoreCase("beddestroys") || sanitized.equalsIgnoreCase("bedbreak") || sanitized.equalsIgnoreCase("bedbreaks")) {
+            return BedBreakEffects;
+        }
+        if (sanitized.equalsIgnoreCase("finalkilleffect")) {
+            return FinalKillEffects;
+        }
+        if (sanitized.equals("back") || sanitized.equals("balance")) {
+            return null; // Handle quietly
         }
         return null;
     }

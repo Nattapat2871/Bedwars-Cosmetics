@@ -12,17 +12,17 @@ Main-Menu:
     slot: 15
     disabled: false
 
-  Projectile-Trails:
+  ProjectileTrails:
     item: "ARROW:0"
     slot: 9
     disabled: false
 
-  FinalKill-Effects:
+  FinalKillEffects:
     item: "IRON_SWORD:0"
     slot: 13
     disabled: false
 
-  Kill-Messages:
+  KillMessages:
     item: "SIGN:0"
     slot: 29
     disabled: false
@@ -32,14 +32,13 @@ Main-Menu:
     slot: 31
     disabled: false
 
-  Bed-Destroys:
-    item: "BED:0"
+  BedBreakEffects:
+    item: "RED_BED:0"
     slot: 33
     disabled: false
 
   WoodSkins:
-    item: "WOOD:0"
-    Data: 5
+    item: "OAK_LOG:0"
     slot: 35
     disabled: false
 
@@ -47,14 +46,13 @@ Main-Menu:
     item: "ARROW:0"
     slot: 49
     disabled: false
-    #this can be used for custom command, custom-command: "back %player%"
 
-  Victory-Dances:
+  VictoryDances:
     item: "player_head:0:eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGM5ZjhlMTAwYWYyMDBlMmM0YjdkOGQ3N2I5MWJlNTYyZGEwMTM2YzBiMGNhZmE4MWIzN2JkYTM0MTM1ZGYxIn19fQ=="
     slot: 11
     disabled: false
 
-  Island-Toppers:
+  IslandToppers:
     item: "player_head:0:eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzc1NjU5YTdiMWQwZDljMjY4YzcwZDliOTJlODE2ZmNkMjhlMzFhNTg4OTYzZDRhMDUwY2VlODVlYzk0MjI0MCJ9fX0="
     slot: 17
     disabled: false
@@ -64,7 +62,7 @@ Main-Menu:
     slot: 27
     disabled: false
 
-  Death-Cries:
+  DeathCries:
     item: "player_head:0:eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjM3MWU0ZTFjZjZhMWEzNmZkYWUyNzEzN2ZkOWI4NzQ4ZTYxNjkyOTk5MjVmOWFmMmJlMzAxZTU0Mjk4YzczIn19fQ=="
     slot: 22
     disabled: false

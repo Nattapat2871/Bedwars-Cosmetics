@@ -59,18 +59,16 @@ public class BurningShoesEffect extends FinalKillEffect {
                     double x = 0.11D * (12.5D - this.t) * Math.cos(this.t + phi);
                     double y = 0.23D * this.t;
                     double z = 0.11D * (12.5D - this.t) * Math.sin(this.t + phi);
-                    location.add(x, y, z);
-
-
+                    location.clone().add(x, y, z);
 
                     ParticleWrapper.getParticle("FLAME").ifPresent(particleWrapper ->
                             particleWrapper.support().displayParticle(onlyVictim ? victim : null,
-                                    location, particleWrapper, 1, 0.0f));
+                                    location.clone().add(x, y, z), particleWrapper, 1, 0.0f));
 
 
-                    location.subtract(x, y, z);
+                    // location.subtract(x, y, z); // No longer needed with clone()
                     if (this.t >= 12.5D) {
-                        location.add(x, y, z);
+                        // location.add(x, y, z); // No longer needed
                         if (phi > Math.PI)
                             cancel();
                     }

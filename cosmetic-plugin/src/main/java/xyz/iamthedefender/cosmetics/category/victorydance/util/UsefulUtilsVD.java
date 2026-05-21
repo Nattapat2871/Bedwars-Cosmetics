@@ -61,14 +61,15 @@ public class UsefulUtilsVD
     }
     
     public static void spawnFireWorks(final Player p, final int amount, final Color color1, final Color color2, final Location loc, boolean preview) {
-        final Firework fw = (Firework) loc.getWorld().spawnEntity(loc.subtract(0.0, 1.0, 0.0), EntityType.FIREWORK);
+        loc.getWorld().playSound(loc, com.cryptomorin.xseries.XSound.ENTITY_FIREWORK_ROCKET_BLAST.parseSound(), 1.0f, 1.0f);
+        final Firework fw = (Firework) loc.getWorld().spawnEntity(loc.clone().subtract(0.0, 1.0, 0.0), EntityType.FIREWORK_ROCKET);
         final FireworkMeta fwm = fw.getFireworkMeta();
         fwm.addEffect(FireworkEffect.builder().withColor(color1).trail(false).flicker(true).build());
         fwm.addEffect(FireworkEffect.builder().withColor(color2).trail(false).flicker(true).build());
         fw.setFireworkMeta(fwm);
         fw.detonate();
         for (int i = 0; i < amount; ++i) {
-            final Firework fw2 = (Firework)loc.getWorld().spawnEntity(loc, EntityType.FIREWORK);
+            final Firework fw2 = (Firework)loc.getWorld().spawnEntity(loc, EntityType.FIREWORK_ROCKET);
             fw2.setFireworkMeta(fwm);
         }
     }

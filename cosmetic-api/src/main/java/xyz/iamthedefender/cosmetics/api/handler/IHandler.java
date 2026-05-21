@@ -11,6 +11,7 @@ public interface IHandler {
     IArenaUtil getArenaUtil();
     ILanguage getLanguageUtil();
     String getAddonPath();
+    java.util.List<Integer> getInventorySlots();
     HandlerType getHandlerType();
 
 }

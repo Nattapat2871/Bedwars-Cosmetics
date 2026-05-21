@@ -1,6 +1,7 @@
 package xyz.iamthedefender.cosmetics.menu;
 
 import com.cryptomorin.xseries.XItemStack;
+import com.cryptomorin.xseries.XSound;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
@@ -36,7 +37,7 @@ public class MainMenu extends ChestSystemGui {
                 List<String> lore = Utility.getListLang(player, langLoc + "." + name + ".lore");
                 String itemName = Utility.getMSGLang(player, langLoc + "." + name + ".name");
                 int slot = config.getInt(loc + "." + name + ".slot");
-                List<String> lores = MainMenuUtils.formatLore(lore, player);
+                List<String> lores = MainMenuUtils.formatLore(player, lore, name);
                 boolean disabled = config.getBoolean(loc + "." + name + ".disabled");
 
                 // Translate for XItemStack
@@ -45,21 +46,18 @@ public class MainMenu extends ChestSystemGui {
                 configurationSection.set("name", itemName);
 
                 if (itemStack != null && !disabled) {
-
+                    Bukkit.getLogger().info("[Cosmetics Debug] Setting menu item: " + name + " in slot: " + slot);
                     super.setItem(slot, XItemStack.edit(itemStack, configurationSection, s -> s, null), (e) -> {
+                        Bukkit.getLogger().info("[Cosmetics Debug] Clicked menu item: " + name);
+                        XSound.UI_BUTTON_CLICK.play((Player) e.getWhoClicked());
                         MainMenuUtils.openMenus((Player) e.getWhoClicked(), name);
                     });
+                } else if (itemStack == null) {
+                    Bukkit.getLogger().warning("[Cosmetics Debug] ItemStack is null for item: " + name);
                 }
             }catch (Exception exception){
                 Bukkit.getLogger().warning("There was an error with main menu item: " + name);
                 throw new RuntimeException(exception);
-            }
-        }
-        String extrasPath = "Extras.fill-empty.";
-        if (config.getBoolean(extrasPath + "enabled")){
-            ItemStack stack = ConfigManager.getItemStack(config, extrasPath + "item");
-            while (getInventory().firstEmpty() != -1){
-                setItem(getInventory().firstEmpty(), new ItemBuilder(stack).name("&r").build());
             }
         }
     }

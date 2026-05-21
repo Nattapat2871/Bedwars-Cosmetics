@@ -55,9 +55,9 @@ public abstract class KillMessage extends Cosmetics {
         finalLore.addAll(Arrays.asList("&8Kill Message", ""));
         finalLore.addAll(getLore());
         if (getRarity() != RarityType.NONE){
-            finalLore.addAll(Arrays.asList("", "&eRight-Click to preview!", "" ,"&7Rarity: {rarity}","&7Cost: &6{cost}", "", "{status}"));
+            finalLore.addAll(Arrays.asList("", "&eRight-Click to preview!", "" ,"&7Rarity: {rarity}","&7Cost: &6{cost}", "", "&7Unlocked: &a{owned}", "", "{status}"));
         }else{
-            finalLore.addAll(Arrays.asList("", "&7Rarity: {rarity}","&7Cost: &6{cost}", "", "{status}"));
+            finalLore.addAll(Arrays.asList("", "&7Rarity: {rarity}","&7Cost: &6{cost}", "", "&7Unlocked: &a{owned}", "", "{status}"));
         }
 
         saveIfNotExistsLang("cosmetics." + configPath + "lore", finalLore);

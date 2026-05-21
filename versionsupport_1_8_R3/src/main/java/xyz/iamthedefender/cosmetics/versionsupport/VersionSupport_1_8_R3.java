@@ -142,11 +142,22 @@ public class VersionSupport_1_8_R3 implements IVersionSupport {
                } else {
                    ProtocolLibrary.getProtocolManager().broadcastServerPacket(packet);
                }
-           }
-       }catch (Exception e) {
-           throw new RuntimeException("Failed to display particle", e);
-       }
-    }
+               }
+               }catch (Exception e) {
+               throw new RuntimeException("Failed to display particle", e);
+               }
+               }
+
+               @Override
+               public void sendCameraPacket(Player player, org.bukkit.entity.Entity entity) {
+               PacketContainer cameraPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
+               cameraPacket.getIntegers().write(0, entity.getEntityId());
+               try {
+               ProtocolLibrary.getProtocolManager().sendServerPacket(player, cameraPacket);
+               } catch (Exception e) {
+               e.printStackTrace();
+               }
+               }
 
 
-}
+               }

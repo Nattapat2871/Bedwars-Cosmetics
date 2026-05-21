@@ -59,8 +59,8 @@ public class TheifBedDestroy extends BedDestroy {
     @Override
     public void execute(Player player, Location bedLocation, ITeamHandler victimTeam) {
         Enderman enderman = (Enderman) player.getWorld().spawnEntity(bedLocation, EntityType.ENDERMAN);
-        assert XMaterial.RED_BED.parseMaterial() != null;
-        enderman.setCarriedMaterial(new MaterialData(XMaterial.RED_BED.parseMaterial()));
+        assert com.cryptomorin.xseries.XMaterial.RED_BED.parseMaterial() != null;
+        enderman.setCarriedMaterial(new MaterialData(com.cryptomorin.xseries.XMaterial.RED_BED.parseMaterial()));
         Run.delayed(enderman::remove, 70L);
     }
 

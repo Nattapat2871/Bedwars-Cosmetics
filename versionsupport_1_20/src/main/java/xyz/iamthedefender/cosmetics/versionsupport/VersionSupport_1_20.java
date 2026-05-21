@@ -114,39 +114,124 @@ public class VersionSupport_1_20 implements IVersionSupport {
         location.getWorld().spawnParticle(dustParticle, location, 1, 0, 0, 0, 0, dustOptions);
     }
 
+    private Object getParticleData(Particle particle) {
+        try {
+            if (particle.getDataType() == org.bukkit.block.data.BlockData.class) {
+                return org.bukkit.Bukkit.createBlockData(org.bukkit.Material.WHITE_WOOL);
+            }
+            if (particle.getDataType() == ItemStack.class) {
+                return new ItemStack(org.bukkit.Material.WHITE_WOOL);
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
     @Override
     public void displayParticle(Player player, Location location, ParticleWrapper particle) {
+        org.bukkit.Particle bukkitParticle = particle.getBukkitParticle();
+        if (bukkitParticle == null) return;
+        Object data = getParticleData(bukkitParticle);
+
         if (player != null) {
-            player.spawnParticle(particle.getNewWrapperParticle().getParticle(), location, 1);
+            player.spawnParticle(bukkitParticle, location, 1, data);
             return;
         }
-        location.getWorld().spawnParticle(particle.getNewWrapperParticle().getParticle(), location, 1);
+        location.getWorld().spawnParticle(bukkitParticle, location, 1, data);
     }
 
     @Override
     public void displayParticle(Player player, Location location, ParticleWrapper particle, int count) {
+        org.bukkit.Particle bukkitParticle = particle.getBukkitParticle();
+        if (bukkitParticle == null) return;
+        Object data = getParticleData(bukkitParticle);
+
         if (player != null) {
-            player.spawnParticle(particle.getNewWrapperParticle().getParticle(), location, count);
+            player.spawnParticle(bukkitParticle, location, count, data);
             return;
         }
-        location.getWorld().spawnParticle(particle.getNewWrapperParticle().getParticle(), location, count);
+        location.getWorld().spawnParticle(bukkitParticle, location, count, data);
     }
 
     @Override
     public void displayParticle(Player player, Location location, ParticleWrapper particle, int count, float speed) {
+        org.bukkit.Particle bukkitParticle = particle.getBukkitParticle();
+        if (bukkitParticle == null) return;
+        Object data = getParticleData(bukkitParticle);
+
         if (player != null) {
-            player.spawnParticle(particle.getNewWrapperParticle().getParticle(), location, count, 0, 0, 0, speed);
+            player.spawnParticle(bukkitParticle, location, count, 0, 0, 0, speed, data);
             return;
         }
-        location.getWorld().spawnParticle(particle.getNewWrapperParticle().getParticle(), location, count, 0, 0, 0, speed);
+        location.getWorld().spawnParticle(bukkitParticle, location, count, 0, 0, 0, speed, data);
     }
 
     @Override
     public void displayParticle(Player player, Location location, ParticleWrapper particle, int count, float speed, Vector offset) {
+        org.bukkit.Particle bukkitParticle = particle.getBukkitParticle();
+        if (bukkitParticle == null) return;
+        Object data = getParticleData(bukkitParticle);
+
         if (player != null) {
-            player.spawnParticle(particle.getNewWrapperParticle().getParticle(), location, count, offset.getX(), offset.getY(), offset.getZ(), speed);
+            player.spawnParticle(bukkitParticle, location, count, offset.getX(), offset.getY(), offset.getZ(), speed, data);
             return;
         }
-        location.getWorld().spawnParticle(particle.getNewWrapperParticle().getParticle(), location, count, offset.getX(), offset.getY(), offset.getZ(), speed);
+        location.getWorld().spawnParticle(bukkitParticle, location, count, offset.getX(), offset.getY(), offset.getZ(), speed, data);
+    }
+
+    @Override
+    public void sendCameraPacket(Player player, org.bukkit.entity.Entity entity) {
+        try {
+            // Get NMS Entity
+            Object nmsEntity = entity.getClass().getMethod("getHandle").invoke(entity);
+
+            // Create Packet
+            Class<?> packetClass = Class.forName("net.minecraft.network.protocol.game.ClientboundSetCameraPacket");
+            // Constructor: public ClientboundSetCameraPacket(Entity entity)
+            Object packet = packetClass.getConstructor(Class.forName("net.minecraft.world.entity.Entity")).newInstance(nmsEntity);
+
+            // Get NMS Player and Connection
+            Object nmsPlayer = player.getClass().getMethod("getHandle").invoke(player);
+            
+            // In 1.21.11, ServerPlayer.connection is field 'c' (ServerGamePacketListenerImpl)
+            // But let's find it by type to be safe.
+            java.lang.reflect.Field connectionField = null;
+            for (java.lang.reflect.Field field : nmsPlayer.getClass().getFields()) {
+                if (field.getType().getSimpleName().equals("ServerGamePacketListenerImpl")) {
+                    connectionField = field;
+                    break;
+                }
+            }
+            if (connectionField == null) {
+                // Fallback to searching all fields including private
+                for (java.lang.reflect.Field field : nmsPlayer.getClass().getDeclaredFields()) {
+                    if (field.getType().getSimpleName().equals("ServerGamePacketListenerImpl")) {
+                        connectionField = field;
+                        connectionField.setAccessible(true);
+                        break;
+                    }
+                }
+            }
+
+            if (connectionField == null) throw new RuntimeException("Could not find connection field in ServerPlayer");
+            
+            Object connection = connectionField.get(nmsPlayer);
+
+            // sendPacket is usually 'a' or 'b' or 'send'
+            java.lang.reflect.Method sendMethod = null;
+            for (java.lang.reflect.Method method : connection.getClass().getMethods()) {
+                if ((method.getName().equals("send") || method.getName().equals("a") || method.getName().equals("b")) 
+                    && method.getParameterCount() == 1 
+                    && method.getParameterTypes()[0].getSimpleName().equals("Packet")) {
+                    sendMethod = method;
+                    break;
+                }
+            }
+
+            if (sendMethod == null) throw new RuntimeException("Could not find sendPacket method in ServerGamePacketListenerImpl");
+
+            sendMethod.invoke(connection, packet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

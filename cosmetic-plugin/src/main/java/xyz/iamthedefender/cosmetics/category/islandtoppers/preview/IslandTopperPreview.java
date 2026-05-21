@@ -1,8 +1,5 @@
 package xyz.iamthedefender.cosmetics.category.islandtoppers.preview;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketContainer;
 import com.cryptomorin.xseries.XSound;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -18,6 +15,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.iamthedefender.cosmetics.CosmeticsPlugin;
 import xyz.iamthedefender.cosmetics.api.configuration.ConfigManager;
+import xyz.iamthedefender.cosmetics.api.cosmetics.CosmeticPreview;
+import xyz.iamthedefender.cosmetics.api.cosmetics.Cosmetics;
 import xyz.iamthedefender.cosmetics.api.cosmetics.CosmeticsType;
 import xyz.iamthedefender.cosmetics.api.cosmetics.FieldsType;
 import xyz.iamthedefender.cosmetics.api.cosmetics.RarityType;
@@ -35,55 +34,21 @@ import java.util.*;
 import static xyz.iamthedefender.cosmetics.util.StartupUtils.getCosmeticLocation;
 import static xyz.iamthedefender.cosmetics.util.StartupUtils.getPlayerLocation;
 
-public class IslandTopperPreview {
+public class IslandTopperPreview extends CosmeticPreview {
 
-    private final Map<UUID, Map<Integer, ItemStack>> inventories = new HashMap<>();
+    public IslandTopperPreview() {
+        super(CosmeticsType.IslandToppers);
+    }
 
-    public void sendIslandTopperPreview(Player player, String selected, SystemGui gui) {
-        for (IslandTopper islandTopper : StartupUtils.islandTopperList) {
-            if (islandTopper.getIdentifier().equals(selected)) {
-                if (islandTopper.getField(FieldsType.RARITY, player) == RarityType.NONE) {
-                    gui.open(player);
-                    XSound.ENTITY_VILLAGER_NO.play(player, 1.0f, 1.0f);
-                    return;
-                }
-            }
-        }
+    @Override
+    public void showPreview(Player player, Cosmetics selected, Location previewLocation, Location playerLocation) throws IllegalArgumentException {
+        if (!(selected instanceof IslandTopper)) return;
+        
+        handleLocation(player, playerLocation);
 
-        UUID playerUUID = player.getUniqueId();
+        Location eyeLocation = playerLocation.clone().add(0, 1.6, 0);
 
-        Location beforeLocation = player.getLocation().clone();
-        Inventory playerInv = player.getInventory();
-        if (!inventories.containsKey(playerUUID)) inventories.put(playerUUID, new HashMap<>());
-
-        Map<Integer, ItemStack> items = inventories.get(playerUUID);
-
-        for (int i = 0; i < playerInv.getSize(); i++) {
-            if (playerInv.getItem(i) == null) continue;
-            if (playerInv.getItem(i).getType() == null) continue;
-            if (playerInv.getItem(i).getType() == Material.AIR) continue;
-
-            items.put(i, playerInv.getItem(i));
-        }
-
-        playerInv.clear();
-        player.closeInventory();
-        Location cosmeticLocation = null, playerLocation = null;
-
-        try {
-            cosmeticLocation = getCosmeticLocation();
-            playerLocation = getPlayerLocation();
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            player.sendMessage(ColorUtil.translate("&cEither Preview location or Player location is not set! Contact the admin."));
-        }
-
-        if (cosmeticLocation == null || playerLocation == null) return;
-
-        final Location finalPlayerLocation = playerLocation;
-        final Location finalCosmeticLocation = cosmeticLocation;
-
-        ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(finalPlayerLocation, EntityType.ARMOR_STAND);
+        ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(eyeLocation, EntityType.ARMOR_STAND);
         as.setVisible(false);
 
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,
@@ -91,39 +56,35 @@ public class IslandTopperPreview {
 
         for (Player player1 : Bukkit.getOnlinePlayers()) {
             if (player1.equals(player)) continue;
-
             player1.hidePlayer(player);
         }
 
-        PacketContainer cameraPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        cameraPacket.getIntegers().write(0, as.getEntityId());
+        CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, as);
 
-        PacketContainer resetPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        resetPacket.getIntegers().write(0, player.getEntityId());
-        CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, cameraPacket);
+        sendIslandTopper(player, previewLocation, selected.getIdentifier());
 
-
-        sendIslandTopper(player, finalCosmeticLocation, selected);
-
-        Run.delayed(() -> {
+        setOnEnd(player, () -> {
             if (!as.isDead()) as.remove();
-
-            CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, resetPacket);
+            CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, player);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
-            player.teleport(beforeLocation);
-
-            for (Player player1 : Bukkit.getOnlinePlayers()) {
-                if (player1.equals(player)) continue;
-
-                player1.showPlayer(player);
+            
+            // Clean up blocks
+            ConfigManager config = ConfigUtils.getIslandToppers();
+            String topperFileName = config.getString(CosmeticsType.IslandToppers.getSectionKey() + "." + selected.getIdentifier() + ".file");
+            if (topperFileName != null) {
+                File file = new File(CosmeticsPlugin.getInstance().getHandler().getAddonPath() + "/IslandToppers/" + topperFileName);
+                if (file.exists()) {
+                    BlockFace direction = BlockFace.SELF;
+                    try {
+                        direction = BlockFace.valueOf(rpGetPlayerDirection(player));
+                    } catch (Exception ignored) {}
+                    Map<Location, BlockData> blockLocations = CosmeticsPlugin.getInstance().getWorldEditHandler().extractBlockData(file, previewLocation, player.getWorld(), direction);
+                    for (Location loc : blockLocations.keySet()) {
+                        player.sendBlockChange(loc, Material.AIR, (byte) 0);
+                    }
+                }
             }
-
-            for (Map.Entry<Integer, ItemStack> entry : items.entrySet()) {
-                playerInv.setItem(entry.getKey(), entry.getValue());
-            }
-
-            gui.open(player);
-        }, 5 * 20L);
+        });
     }
 
     private void sendIslandTopper(Player player, Location location, String selected) {
@@ -163,30 +124,17 @@ public class IslandTopperPreview {
 
         new BukkitRunnable() {
             private int index = 0;
-            private boolean showingBlocks = true;
 
             @Override
             public void run() {
                 if (blockLocations.isEmpty() || index >= locations.size()) {
-                    if (showingBlocks) {
-                        // Switch to hiding blocks
-                        showingBlocks = false;
-                        index = 0;
-                    } else {
-                        // Animation complete
-                        cancel();
-                    }
+                    cancel();
                     return;
                 }
 
                 Location loc = locations.get(index);
-
-                if (showingBlocks) {
-                    BlockData blockData = blockLocations.get(loc);
-                    player.sendBlockChange(loc, blockData.getMaterial(), blockData.getData());
-                } else {
-                    player.sendBlockChange(loc, Material.AIR, (byte) 0);
-                }
+                BlockData blockData = blockLocations.get(loc);
+                player.sendBlockChange(loc, blockData.getMaterial(), blockData.getData());
 
                 index++;
             }
@@ -202,39 +150,39 @@ public class IslandTopperPreview {
         y %= 360;
         int i = (int) ((y + 8) / 22.5);
         if (i == 0) {
-            dir = "west";
+            dir = "WEST";
         } else if (i == 1) {
-            dir = "west northwest";
+            dir = "WEST_NORTHWEST";
         } else if (i == 2) {
-            dir = "northwest";
+            dir = "NORTHWEST";
         } else if (i == 3) {
-            dir = "north northwest";
+            dir = "NORTH_NORTHWEST";
         } else if (i == 4) {
-            dir = "north";
+            dir = "NORTH";
         } else if (i == 5) {
-            dir = "north northeast";
+            dir = "NORTH_NORTHEAST";
         } else if (i == 6) {
-            dir = "northeast";
+            dir = "NORTHEAST";
         } else if (i == 7) {
-            dir = "east northeast";
+            dir = "EAST_NORTHEAST";
         } else if (i == 8) {
-            dir = "east";
+            dir = "EAST";
         } else if (i == 9) {
-            dir = "east southeast";
+            dir = "EAST_SOUTHEAST";
         } else if (i == 10) {
-            dir = "southeast";
+            dir = "SOUTHEAST";
         } else if (i == 11) {
-            dir = "south southeast";
+            dir = "SOUTH_SOUTHEAST";
         } else if (i == 12) {
-            dir = "south";
+            dir = "SOUTH";
         } else if (i == 13) {
-            dir = "south southwest";
+            dir = "SOUTH_SOUTHWEST";
         } else if (i == 14) {
-            dir = "southwest";
+            dir = "SOUTHWEST";
         } else if (i == 15) {
-            dir = "west southwest";
+            dir = "WEST_SOUTHWEST";
         } else {
-            dir = "west";
+            dir = "WEST";
         }
         return dir;
     }

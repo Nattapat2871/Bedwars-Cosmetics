@@ -30,6 +30,7 @@ import xyz.iamthedefender.cosmetics.category.glyphs.items.GlyphItems;
 import xyz.iamthedefender.cosmetics.category.glyphs.preview.GlyphPreview;
 import xyz.iamthedefender.cosmetics.category.islandtoppers.items.IslandTopperItems;
 import xyz.iamthedefender.cosmetics.category.killmessage.items.KillMessageItems;
+import xyz.iamthedefender.cosmetics.category.islandtoppers.preview.IslandTopperPreview;
 import xyz.iamthedefender.cosmetics.category.killmessage.preview.KillMessagePreview;
 import xyz.iamthedefender.cosmetics.category.projectiletrails.items.ProjectileTrailItems;
 import xyz.iamthedefender.cosmetics.category.shopkeeperskins.items.ShopKeeperItems;
@@ -283,7 +284,7 @@ public class StartupUtils
         Logger log = Bukkit.getLogger();
         if (Bukkit.getPluginManager().getPlugin("BedWars2023") == null) {
             if (!isPluginEnabled("BedWars1058") && !CosmeticsPlugin.getInstance().getApi().isProxy() && !isPluginEnabled("BedWars")){
-                log.severe("Cosmetics addon requires BedWars1058, BedWars2023, BedWarsProxy or ScreamingBedWars to work!");
+                log.severe("Cosmetics addon requires BedWars1058, BedWars2023 or BedWarsProxy to work!");
                 return false;
             }
         } else {
@@ -409,7 +410,7 @@ public class StartupUtils
         new GlyphPreview();
         new KillMessagePreview();
         new FinalKillEffectPreview();
-        // new IslandTopperPreview(); - temporarily disabled
+        // new IslandTopperPreview();
         new DeathCryPreview();
         new SprayPreview();
     }
@@ -432,7 +433,10 @@ public class StartupUtils
     }
 
     public static Location getCosmeticLocation() {
-        World world = Bukkit.getWorld(CosmeticsPlugin.getInstance().getConfig().getString("cosmetic-preview.cosmetic-location.world"));
+        String worldName = CosmeticsPlugin.getInstance().getConfig().getString("cosmetic-preview.cosmetic-location.world");
+        if (worldName == null || worldName.isEmpty()) return null;
+        World world = Bukkit.getWorld(worldName);
+        if (world == null) return null;
         double x = CosmeticsPlugin.getInstance().getConfig().getDouble("cosmetic-preview.cosmetic-location.x");
         double y = CosmeticsPlugin.getInstance().getConfig().getDouble("cosmetic-preview.cosmetic-location.y");
         double z = CosmeticsPlugin.getInstance().getConfig().getDouble("cosmetic-preview.cosmetic-location.z");
@@ -447,7 +451,10 @@ public class StartupUtils
     }
 
     public static Location getPlayerLocation() {
-        World world = Bukkit.getWorld(CosmeticsPlugin.getInstance().getConfig().getString("cosmetic-preview.player-location.world"));
+        String worldName = CosmeticsPlugin.getInstance().getConfig().getString("cosmetic-preview.player-location.world");
+        if (worldName == null || worldName.isEmpty()) return null;
+        World world = Bukkit.getWorld(worldName);
+        if (world == null) return null;
         double x = CosmeticsPlugin.getInstance().getConfig().getDouble("cosmetic-preview.player-location.x");
         double y = CosmeticsPlugin.getInstance().getConfig().getDouble("cosmetic-preview.player-location.y");
         double z = CosmeticsPlugin.getInstance().getConfig().getDouble("cosmetic-preview.player-location.z");

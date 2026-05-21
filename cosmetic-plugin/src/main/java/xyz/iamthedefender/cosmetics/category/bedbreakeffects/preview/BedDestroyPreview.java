@@ -30,7 +30,9 @@ public class BedDestroyPreview extends CosmeticPreview {
     public void showPreview(Player player, Cosmetics selected, Location previewLocation, Location playerLocation) throws IllegalArgumentException {
         handleLocation(player, playerLocation);
 
-        ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(playerLocation, EntityType.ARMOR_STAND);
+        Location eyeLocation = playerLocation.clone().add(0, 1.6, 0);
+
+        ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(eyeLocation, EntityType.ARMOR_STAND);
         as.setVisible(false);
 
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,
@@ -38,17 +40,12 @@ public class BedDestroyPreview extends CosmeticPreview {
 
         Runnable onEnd = sendBedBreakEffect(player, previewLocation, (BedDestroy) selected);
 
-        PacketContainer cameraPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        cameraPacket.getIntegers().write(0, as.getEntityId());
-
-        PacketContainer resetPacket = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CAMERA);
-        resetPacket.getIntegers().write(0, player.getEntityId());
-        CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, cameraPacket);
+        CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, as);
 
         setOnEnd(player, () -> {
             if (!as.isDead()) as.remove();
 
-            CosmeticsPlugin.getInstance().getProtocolManager().sendServerPacket(player, resetPacket);
+            CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, player);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
 
             onEnd.run();
@@ -58,7 +55,7 @@ public class BedDestroyPreview extends CosmeticPreview {
     private Runnable sendBedBreakEffect(Player player, Location location, BedDestroy selected) {
         Material old = location.getBlock().getType();
         byte data = location.getBlock().getData();
-        player.sendBlockChange(location, XMaterial.RED_BED.parseMaterial(), XMaterial.RED_BED.getData());
+        player.sendBlockChange(location, com.cryptomorin.xseries.XMaterial.RED_BED.parseMaterial(), XMaterial.RED_BED.getData());
 
         Run.delayed(() -> {
             player.sendBlockChange(location, old, data);

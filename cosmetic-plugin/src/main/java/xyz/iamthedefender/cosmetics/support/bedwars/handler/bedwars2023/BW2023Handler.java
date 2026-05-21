@@ -24,11 +24,14 @@ import xyz.iamthedefender.cosmetics.util.StartupUtils;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BW2023Handler implements IHandler {
 
     private final BedWars api = com.tomkeuper.bedwars.BedWars.getAPI();
+    public static Map<String, Boolean> arenas = new ConcurrentHashMap<>();
 
     @Override
     public void register() {
@@ -48,6 +51,11 @@ public class BW2023Handler implements IHandler {
         StartupUtils.registerListeners(new BedDestroyHandler2023());
         StartupUtils.registerListeners(new SpraysHandler2023());
         StartupUtils.registerListeners(new DeathCryHandler2023());
+    }
+
+    @Override
+    public List<Integer> getInventorySlots() {
+        return Arrays.asList(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43);
     }
 
     @Override

@@ -63,7 +63,7 @@ public abstract class VictoryDance extends Cosmetics {
         List<String> finalLore = new ArrayList<>();
         finalLore.addAll(Arrays.asList("&8Victory Dance", ""));
         finalLore.addAll(getLore());
-        finalLore.addAll(Arrays.asList("", "&7Rarity: {rarity}","&7Cost: &6{cost}", "", "{status}"));
+        finalLore.addAll(Arrays.asList("", "&7Rarity: {rarity}","&7Cost: &6{cost}", "", "&7Unlocked: &a{owned}", "", "{status}"));
 
         saveIfNotExistsLang("cosmetics." + configPath + "lore", finalLore);
         Utility.getApi().getVictoryDanceList().add(this);
@@ -108,20 +108,28 @@ public abstract class VictoryDance extends Cosmetics {
     public abstract void execute(Player winner);
 
     public void stopExecution(Player winner) {
-        if (tasks.containsKey(winner)) tasks.get(winner).forEach(BukkitTask::cancel);
+        List<BukkitTask> playerTasks = tasks.remove(winner);
+        if (playerTasks != null) {
+            playerTasks.forEach(BukkitTask::cancel);
+        }
 
-        if (entities.containsKey(winner)) {
-            entities.get(winner).forEach((e) -> {
-				var passengers = e.getPassengers();
-				if (passengers != null)
-					passengers.forEach(Entity::remove);
+        List<Entity> playerEntities = entities.remove(winner);
+        if (playerEntities != null) {
+            playerEntities.forEach((e) -> {
+                if (e != null && !e.isDead()) {
+                    var passengers = e.getPassengers();
+                    if (passengers != null)
+                        passengers.forEach(entity -> {
+                            if (!(entity instanceof Player)) entity.remove();
+                        });
 
-				var vehicle = e.getVehicle();
-				if (vehicle != null)
-					vehicle.remove();
+                    var vehicle = e.getVehicle();
+                    if (vehicle != null && !(vehicle instanceof Player))
+                        vehicle.remove();
 
-				e.remove();
-			});
+                    if (!(e instanceof Player)) e.remove();
+                }
+            });
         }
     }
 

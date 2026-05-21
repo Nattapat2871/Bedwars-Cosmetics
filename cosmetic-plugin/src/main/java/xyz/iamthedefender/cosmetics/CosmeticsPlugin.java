@@ -36,11 +36,7 @@ import xyz.iamthedefender.cosmetics.data.PlayerOwnedData;
 import xyz.iamthedefender.cosmetics.data.database.MySQL;
 import xyz.iamthedefender.cosmetics.data.database.SQLite;
 import xyz.iamthedefender.cosmetics.data.manager.PlayerManager;
-import xyz.iamthedefender.cosmetics.support.bedwars.handler.bedwars1058.BW1058Handler;
-import xyz.iamthedefender.cosmetics.support.bedwars.handler.bedwars1058.BW1058ProxyHandler;
 import xyz.iamthedefender.cosmetics.support.bedwars.handler.bedwars2023.BW2023Handler;
-import xyz.iamthedefender.cosmetics.support.bedwars.handler.bedwars2023.BW2023ProxyHandler;
-import xyz.iamthedefender.cosmetics.support.bedwars.handler.screamingBedwars.ScreamingBedWarsHandler;
 import xyz.iamthedefender.cosmetics.util.MainMenuUtils;
 import xyz.iamthedefender.cosmetics.util.Metrics;
 import xyz.iamthedefender.cosmetics.util.StartupUtils;
@@ -86,6 +82,7 @@ public class CosmeticsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        getLogger().info("Cosmetics v1.4.10 (Raphael Build) is enabling...");
         instance = this;
         api = new BwcAPI();
         previewList = new ArrayList<>();
@@ -205,17 +202,7 @@ public class CosmeticsPlugin extends JavaPlugin {
     }
 
     private IHandler findHandler() {
-
-        if (StartupUtils.isPluginEnabled("BedWars")) {
-            try {
-                return new ScreamingBedWarsHandler();
-            }catch (Throwable throwable) {
-                throwable.printStackTrace();
-                throw new RuntimeException("Failed to find a valid BedWars plugin, are you using a supported BedWars plugin?");
-            }
-        }
-
-        return api.isProxy() ? (StartupUtils.isBw2023 ? new BW2023ProxyHandler() : new BW1058ProxyHandler()) : (StartupUtils.isBw2023 ? new BW2023Handler() : new BW1058Handler());
+        return new BW2023Handler();
     }
 
     @Override

@@ -60,14 +60,14 @@ public class RektEffect extends FinalKillEffect {
         ArmorStand stand;
 
         if (onlyVictim) {
-            stand = (ArmorStand) victim.getWorld().spawnEntity(location.add(0, 2, 0), EntityType.ARMOR_STAND);
+            stand = (ArmorStand) victim.getWorld().spawnEntity(location.clone().add(0, 2, 0), EntityType.ARMOR_STAND);
             EntityUtil.entityForPlayerOnly(stand, victim);
             stand.setCustomName(ColorUtil.translate("&6" + killer.getDisplayName() + " &ehas #rekt &6Derperino &ehere"));
 
             schedulePlayerSpecificStandRemoval(stand, victim, 80L);
         } else {
-            stand = (ArmorStand) victim.getWorld().spawnEntity(victim.getEyeLocation(), EntityType.ARMOR_STAND);
-            stand.setCustomName(ColorUtil.translate("&6" + killer.getDisplayName() + " &ehas #rekt &6" + victim.getDisplayName() + "&ehere"));
+            stand = (ArmorStand) location.getWorld().spawnEntity(location.clone().add(0, 2, 0), EntityType.ARMOR_STAND);
+            stand.setCustomName(ColorUtil.translate("&6" + killer.getDisplayName() + " &ehas #rekt &6" + victim.getDisplayName() + " &ehere"));
 
             scheduleStandRemoval(stand, 200L);
         }

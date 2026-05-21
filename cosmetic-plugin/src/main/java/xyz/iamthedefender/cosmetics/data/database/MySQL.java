@@ -113,6 +113,11 @@ public class MySQL implements IDatabase {
                         "victory_dance INT," +
                         "wood_skin INT" +
                         ")");
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS cosmetics_ownership (" +
+                        "uuid VARCHAR(36)," +
+                        "cosmetic_id VARCHAR(255)," +
+                        "PRIMARY KEY (uuid, cosmetic_id)" +
+                        ")");
                 connection.close();
             } catch (SQLException e) {
                 Bukkit.getLogger().severe("Failed to create player-data table: " + e.getMessage());

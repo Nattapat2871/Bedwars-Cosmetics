@@ -33,8 +33,6 @@ public class PlayerManager {
     }
 
     public PlayerOwnedData getPlayerOwnedData(UUID uuid) {
-        PlayerOwnedData playerOwnedData = playerOwnedDataHashMap.computeIfAbsent(uuid, PlayerOwnedData::new);
-        playerOwnedData.load();
-        return playerOwnedData;
+        return playerOwnedDataHashMap.computeIfAbsent(uuid, PlayerOwnedData::new);
     }
 }

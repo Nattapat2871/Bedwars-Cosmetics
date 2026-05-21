@@ -55,7 +55,7 @@ public class ToyStickDance extends VictoryDance implements Listener {
 
     @Override
     public int getPrice() {
-        return 0;
+        return 5000;
     }
 
     @Override
