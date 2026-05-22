@@ -116,11 +116,20 @@ public class CategoryMenu extends ChestSystemGui {
 
             // Support variations of owned placeholders in sub-menus
             String finalOwnedProgress = ownedProgress;
+            BwcAPI bwcApi = (BwcAPI) CosmeticsPlugin.getInstance().getApi();
+            String selectedStr = "&a" + StringUtils.replaceHyphensAndCaptalizeFirstLetter(bwcApi.getSelectedCosmetic(player, cosmeticsType));
+            
             lore = lore.stream().map(s -> {
                 String result = s;
-                String[] tags = {"{ownedSpray}", "{ownedspray}", "{ownedgly}", "{ownedglyph}", "{ownedws}", "{ownedwoodskin}", "{ownedsk}", "{ownedshopkeeper}", "{ownedpt}", "{ownedvd}", "{ownedfke}", "{ownedbd}", "{ownedkm}", "{ownedit}", "{owned}", "{ownedfinalkill}", "{ownedbbe}"};
-                for (String tag : tags) {
+                // Owned tags
+                String[] ownedTags = {"{ownedSpray}", "{ownedspray}", "{ownedgly}", "{ownedglyph}", "{ownedws}", "{ownedwoodskin}", "{ownedsk}", "{ownedshopkeeper}", "{ownedpt}", "{ownedvd}", "{ownedfke}", "{ownedbd}", "{ownedkm}", "{ownedit}", "{owned}", "{ownedfinalkill}", "{ownedbbe}"};
+                for (String tag : ownedTags) {
                     result = result.replace(tag, finalOwnedProgress);
+                }
+                // Selected name tags (added for completeness)
+                String[] selectedTags = {"{selected}", "{spraysselected}", "{spary}", "{spray}", "{sprays}", "{projectileselected}", "{projectiletrail}", "{projectile}", "{victorydanceselected}", "{victorydance}", "{victorydances}", "{finalkillselected}", "{finalkilleffect}", "{finalkill}", "{islandtopperselected}", "{islandtopper}", "{islandtoppers}", "{killmessageselected}", "{killmessage}", "{killmessages}", "{bedbreakselected}", "{bedbreak}", "{bedbreakeffect}", "{woodskin}", "{woodskins}", "{glyphsselected}", "{glyph}", "{glyphs}", "{shopkeeperselected}", "{shopkeeper}", "{shopkeeperskin}", "{shopkeeperskins}", "{deathcryselected}", "{deathcry}", "{deathcries}", "{victory}", "{killmsg}"};
+                for (String tag : selectedTags) {
+                    result = result.replace(tag, selectedStr);
                 }
                 return result;
             }).collect(Collectors.toList());
