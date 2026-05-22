@@ -105,8 +105,14 @@ public class SpraysUtil
      */
     private static void addRendererAndShowSpray(Player player, ItemFrame itemFrame, CustomRenderer renderer, MapView view, boolean isPreview) {
         ItemStack map = CosmeticsPlugin.getInstance().getApi().getVersionSupport().applyRenderer(renderer, view);
-        itemFrame.setItem(map);
-        itemFrame.setRotation(Rotation.NONE);
+        
+        // Use a 1-tick delay to ensure item frame is tracked before setting item
+        Bukkit.getScheduler().runTaskLater(CosmeticsPlugin.getInstance(), () -> {
+            if (itemFrame.isValid()) {
+                itemFrame.setItem(map);
+                itemFrame.setRotation(Rotation.NONE);
+            }
+        }, 1L);
 
         if(isPreview){
             itemFrame.setFacingDirection(SprayPreview.getCardinalDirection(player.getLocation()).getOppositeFace());

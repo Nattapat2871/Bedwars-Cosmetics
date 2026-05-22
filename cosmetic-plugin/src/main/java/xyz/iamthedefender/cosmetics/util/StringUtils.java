@@ -14,21 +14,28 @@ public class StringUtils {
         decimalFormat.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US));
 
         for(int i = 0; i < lores.size(); i++){
-            if (lores.get(i).contains("{status}")){
-                lores.set(i, lores.get(i).replace("{status}", status));
+            String line = lores.get(i);
+            if (line.contains("{status}")){
+                line = line.replace("{status}", status);
             }
-            if (lores.get(i).contains("{name}")){
-                lores.set(i, lores.get(i).replace("{name}", name.replace("-", " ")));
+            if (line.contains("{name}")){
+                line = line.replace("{name}", name.replace("-", " "));
             }
-            if (lores.get(i).contains("{cost}")){
-                lores.set(i, lores.get(i).replace("{cost}", decimalFormat.format(price)));
+            if (line.contains("{cost}")){
+                line = line.replace("{cost}", decimalFormat.format(price));
             }
-            if (lores.get(i).contains("{rarity}")){
-                lores.set(i, lores.get(i).replace("{rarity}", rarity));
+            if (line.contains("{rarity}")){
+                line = line.replace("{rarity}", rarity);
             }
-            if (lores.get(i).contains("{owned}")){
-                lores.set(i, lores.get(i).replace("{owned}", ownedCount));
+            
+            // Handle all variations of owned placeholders
+            String[] ownedTags = {"{owned}", "{ownedSpray}", "{ownedspray}", "{ownedownerspary}", "{ownedsprays}", "{ownedpt}", "{ownedprojectiletrails}", "{ownedvd}", "{ownedvictorydances}", "{ownedfke}", "{ownedfinalkilleffects}", "{ownedit}", "{ownedislandtoppers}", "{ownedkm}", "{ownedkillmessages}", "{ownedbd}", "{ownedbedbreakeffects}", "{ownedws}", "{ownedwoodskin}", "{ownedwoodskins}", "{ownedgly}", "{ownedglyph}", "{ownedglyphs}", "{ownedsk}", "{ownedshopkeeper}", "{ownedshopkeeperskin}", "{ownedshopkeeperskins}", "{owneddc}", "{owneddeathcry}", "{owneddeathcries}", "{ownerspary}", "{ownedfinalkill}", "{ownedbbe}"};
+            for (String tag : ownedTags) {
+                if (line.contains(tag)) {
+                    line = line.replace(tag, ownedCount);
+                }
             }
+            lores.set(i, line);
         }
         return new ArrayList<>(lores);
     }

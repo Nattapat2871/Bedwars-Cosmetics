@@ -49,7 +49,7 @@ public class MainMenu extends ChestSystemGui {
                     Bukkit.getLogger().info("[Cosmetics Debug] Setting menu item: " + name + " in slot: " + slot);
                     super.setItem(slot, XItemStack.edit(itemStack, configurationSection, s -> s, null), (e) -> {
                         Bukkit.getLogger().info("[Cosmetics Debug] Clicked menu item: " + name);
-                        XSound.UI_BUTTON_CLICK.play((Player) e.getWhoClicked());
+                        XSound.UI_BUTTON_CLICK.play((Player) e.getWhoClicked(), 0.3f, 1.0f);
                         MainMenuUtils.openMenus((Player) e.getWhoClicked(), name);
                     });
                 } else if (itemStack == null) {

@@ -118,7 +118,7 @@ public class CategoryMenu extends ChestSystemGui {
             String finalOwnedProgress = ownedProgress;
             lore = lore.stream().map(s -> {
                 String result = s;
-                String[] tags = {"{ownedSpray}", "{ownedspray}", "{ownedgly}", "{ownedglyph}", "{ownedws}", "{ownedwoodskin}", "{ownedsk}", "{ownedshopkeeper}", "{ownedpt}", "{ownedvd}", "{ownedfke}", "{ownedbd}", "{ownedkm}", "{ownedit}", "{owned}"};
+                String[] tags = {"{ownedSpray}", "{ownedspray}", "{ownedgly}", "{ownedglyph}", "{ownedws}", "{ownedwoodskin}", "{ownedsk}", "{ownedshopkeeper}", "{ownedpt}", "{ownedvd}", "{ownedfke}", "{ownedbd}", "{ownedkm}", "{ownedit}", "{owned}", "{ownedfinalkill}", "{ownedbbe}"};
                 for (String tag : tags) {
                     result = result.replace(tag, finalOwnedProgress);
                 }
@@ -149,14 +149,14 @@ public class CategoryMenu extends ChestSystemGui {
 
                     if (e.getClick() == ClickType.RIGHT) {
                         if (cosmeticsType != CosmeticsType.IslandToppers) {
-                            XSound.UI_BUTTON_CLICK.play(player);
+                            XSound.UI_BUTTON_CLICK.play(player, 0.3f, 1.0f);
                         }
                         previewClick(player, cosmeticsType, id, price);
                         return;
                     }
 
                     if (e.getClick() == ClickType.LEFT){
-                        XSound.UI_BUTTON_CLICK.play(player);
+                        XSound.UI_BUTTON_CLICK.play(player, 0.3f, 1.0f);
                         onClick(player, cosmeticsType, price, id, false);
                     }
                 });
@@ -169,7 +169,7 @@ public class CategoryMenu extends ChestSystemGui {
 
         if (CosmeticsPlugin.getInstance().getConfig().getBoolean("BackItemInCosmeticsMenu")) {
             setItem(49, new ItemBuilder().material(Material.ARROW).name("&aBack").build(), (e) -> {
-                XSound.UI_BUTTON_CLICK.play((Player) e.getWhoClicked());
+                XSound.UI_BUTTON_CLICK.play((Player) e.getWhoClicked(), 0.3f, 1.0f);
                 new MainMenu((Player) e.getWhoClicked()).open((Player) e.getWhoClicked());
             });
         }
@@ -204,14 +204,14 @@ public class CategoryMenu extends ChestSystemGui {
 
         if(page < totalPages) {
             setItem(51, new ItemBuilder().material(Material.ARROW).name("&aNext page").build(), (e) -> {
-                XSound.UI_BUTTON_CLICK.play((Player) e.getWhoClicked());
+                XSound.UI_BUTTON_CLICK.play((Player) e.getWhoClicked(), 0.3f, 1.0f);
                 new CategoryMenu(cosmeticsType, title, page + 1).open((Player) e.getWhoClicked());
             });
         }
 
         if(page > 1) {
             setItem(47, new ItemBuilder().material(Material.ARROW).name("&aPrevious page").build(), (e) -> {
-                XSound.UI_BUTTON_CLICK.play((Player) e.getWhoClicked());
+                XSound.UI_BUTTON_CLICK.play((Player) e.getWhoClicked(), 0.3f, 1.0f);
                 new CategoryMenu(cosmeticsType, title, page - 1).open((Player) e.getWhoClicked());
             });
         }
@@ -299,7 +299,7 @@ public class CategoryMenu extends ChestSystemGui {
             }
             if (isOnlyForCheck) return 1;
             api.setSelectedCosmetic(p, type, id);
-            XSound.UI_BUTTON_CLICK.play(p);
+            XSound.UI_BUTTON_CLICK.play(p, 0.3f, 1.0f);
             new CategoryMenu(cosmeticsType, title, page).open(p);
             return -2;
         }
@@ -307,7 +307,7 @@ public class CategoryMenu extends ChestSystemGui {
         if (price > eco.getBalance(p)) {
             if (isOnlyForCheck) return 2;
             p.sendMessage(ColorUtil.translate("&cYou don't have enough money!"));
-            XSound.ENTITY_VILLAGER_NO.play(p);
+            XSound.ENTITY_VILLAGER_NO.play(p, 1.0f, 1.0f);
             return 2;
         }
 

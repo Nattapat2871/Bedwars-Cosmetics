@@ -97,14 +97,14 @@ public class MainMenuUtils {
             String s = line;
 
             if (type != null) {
-                // Unlocked count replacements
-                String[] ownedTags = {"{owned}", "{ownedSpray}", "{ownedspray}", "{ownedownerspary}", "{ownedsprays}", "{ownedpt}", "{ownedprojectiletrails}", "{ownedvd}", "{ownedvictorydances}", "{ownedfke}", "{ownedfinalkilleffects}", "{ownedit}", "{ownedislandtoppers}", "{ownedkm}", "{ownedkillmessages}", "{ownedbd}", "{ownedbedbreakeffects}", "{ownedws}", "{ownedwoodskin}", "{ownedwoodskins}", "{ownedgly}", "{ownedglyph}", "{ownedglyphs}", "{ownedsk}", "{ownedshopkeeper}", "{ownedshopkeeperskin}", "{ownedshopkeeperskins}", "{owneddc}", "{owneddeathcry}", "{owneddeathcries}", "{ownerspary}"};
+                // Unlocked count replacements (Standardized list for ALL tags)
+                String[] ownedTags = {"{owned}", "{ownedSpray}", "{ownedspray}", "{ownedownerspary}", "{ownedsprays}", "{ownedpt}", "{ownedprojectiletrails}", "{ownedvd}", "{ownedvictorydances}", "{ownedfke}", "{ownedfinalkilleffects}", "{ownedit}", "{ownedislandtoppers}", "{ownedkm}", "{ownedkillmessages}", "{ownedbd}", "{ownedbedbreakeffects}", "{ownedws}", "{ownedwoodskin}", "{ownedwoodskins}", "{ownedgly}", "{ownedglyph}", "{ownedglyphs}", "{ownedsk}", "{ownedshopkeeper}", "{ownedshopkeeperskin}", "{ownedshopkeeperskins}", "{owneddc}", "{owneddeathcry}", "{owneddeathcries}", "{ownerspary}", "{ownedfinalkill}", "{ownedbbe}"};
                 for (String tag : ownedTags) {
                     s = s.replace(tag, ownedProgress);
                 }
 
-                // Selected name replacements
-                String[] selectedTags = {"{selected}", "{spraysselected}", "{spary}", "{spray}", "{sprays}", "{projectileselected}", "{projectiletrail}", "{projectile}", "{victorydanceselected}", "{victorydance}", "{victorydances}", "{finalkillselected}", "{finalkilleffect}", "{finalkill}", "{islandtopperselected}", "{islandtopper}", "{islandtoppers}", "{killmessageselected}", "{killmessage}", "{killmessages}", "{bedbreakselected}", "{bedbreak}", "{bedbreakeffect}", "{woodskin}", "{woodskins}", "{glyphsselected}", "{glyph}", "{glyphs}", "{shopkeeperselected}", "{shopkeeper}", "{shopkeeperskin}", "{shopkeeperskins}", "{deathcryselected}", "{deathcry}", "{deathcries}"};
+                // Selected name replacements (Standardized list for ALL tags)
+                String[] selectedTags = {"{selected}", "{spraysselected}", "{spary}", "{spray}", "{sprays}", "{projectileselected}", "{projectiletrail}", "{projectile}", "{victorydanceselected}", "{victorydance}", "{victorydances}", "{finalkillselected}", "{finalkilleffect}", "{finalkill}", "{islandtopperselected}", "{islandtopper}", "{islandtoppers}", "{killmessageselected}", "{killmessage}", "{killmessages}", "{bedbreakselected}", "{bedbreak}", "{bedbreakeffect}", "{woodskin}", "{woodskins}", "{glyphsselected}", "{glyph}", "{glyphs}", "{shopkeeperselected}", "{shopkeeper}", "{shopkeeperskin}", "{shopkeeperskins}", "{deathcryselected}", "{deathcry}", "{deathcries}", "{victory}", "{killmsg}"};
                 for (String tag : selectedTags) {
                     s = s.replace(tag, selectedStr);
                 }
