@@ -76,7 +76,10 @@ public class SprayPreview extends CosmeticPreview {
         firstBlock.getBlock().setType(Material.BARRIER);
         firstBlock.getChunk().load(true);
         
-        final ItemFrame frame = (ItemFrame) player.getWorld().spawnEntity(firstBlock.getBlock().getRelative(getCardinalDirection(playerLocation).getOppositeFace()).getLocation(), EntityType.ITEM_FRAME);
+        // Correct fix for Spray Preview direction on 1.21.11
+        // We spawn the ItemFrame on the face of the barrier block that points TOWARDS the player.
+        BlockFace playerFacing = getCardinalDirection(playerLocation);
+        final ItemFrame frame = (ItemFrame) player.getWorld().spawnEntity(firstBlock.getBlock().getRelative(playerFacing).getLocation(), EntityType.ITEM_FRAME);
 
         final PacketAdapter adapter = new PacketAdapter(CosmeticsPlugin.getInstance(), PacketType.Play.Server.SPAWN_ENTITY) {
             @Override
@@ -89,7 +92,7 @@ public class SprayPreview extends CosmeticPreview {
         };
 
         CosmeticsPlugin.getInstance().getProtocolManager().addPacketListener(adapter);
-        frame.setFacingDirection(getCardinalDirection(playerLocation), true);
+        frame.setFacingDirection(playerFacing, true);
         SpraysUtil.spawnSprays(player, frame, true, (Spray) selected);
 
         XSound.ENTITY_SILVERFISH_HURT.play(player, 10f, 10f);
@@ -117,15 +120,14 @@ public class SprayPreview extends CosmeticPreview {
             yaw += 360;
         }
 
-        // Inverted, so if facing is SOUTH it will return NORTH
         if (yaw >= 315 || yaw < 45) {
             return BlockFace.SOUTH;
         } else if (yaw >= 45 && yaw < 135) {
-            return BlockFace.EAST;
+            return BlockFace.WEST;
         } else if (yaw >= 135 && yaw < 225) {
             return BlockFace.NORTH;
         } else if (yaw >= 225) {
-            return BlockFace.WEST;
+            return BlockFace.EAST;
         } else {
             return BlockFace.SELF;
         }
