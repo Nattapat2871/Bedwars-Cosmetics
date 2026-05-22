@@ -22,37 +22,41 @@ import java.util.List;
 
 public class MainMenuUtils {
 
+    public static List<String> getGenericLore() {
+        return Arrays.asList("&7Unlocked: &a{owned}", "&7Currently Selected: &a{selected}", "", "&eClick to view.");
+    }
+
     public static void saveLores() {
-        List<String> genericLore = Arrays.asList("&7Unlocked: &a{owned}", "&7Currently Selected: &a{selected}", "", "&eClick to view.");
+        List<String> genericLore = getGenericLore();
         
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.Sprays.lore", genericLore);
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.Sprays.name", "&aSprays");
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.ProjectileTrails.lore", genericLore);
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.ProjectileTrails.name", "&aProjectile Trails");
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.FinalKillEffects.lore", genericLore);
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.FinalKillEffects.name", "&aFinal Kill Effects");
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.KillMessages.lore", genericLore);
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.KillMessages.name", "&aKill Messages");
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.Glyphs.lore", genericLore);
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.Glyphs.name", "&aGlyphs");
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.BedBreakEffects.lore", genericLore);
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.BedBreakEffects.name", "&aBed Destroys");
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.WoodSkins.lore", genericLore);
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.WoodSkins.name", "&aWood Skins");
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.VictoryDances.lore", genericLore);
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.VictoryDances.name", "&aVictory Dances");
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.IslandToppers.lore", genericLore);
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.IslandToppers.name", "&aIsland Toppers");
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.ShopKeeperSkins.lore", genericLore);
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.ShopKeeperSkins.name", "&aShopKeeper Skins");
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.DeathCries.lore", genericLore);
-        Utility.saveIfNotExistsLang("cosmetics.main-menu.DeathCries.name", "&aDeath Cries");
+        saveVariation("Sprays", "&aSprays", genericLore);
+        saveVariation("ProjectileTrails", "&aProjectile Trails", genericLore);
+        saveVariation("FinalKillEffects", "&aFinal Kill Effects", genericLore);
+        saveVariation("KillMessages", "&aKill Messages", genericLore);
+        saveVariation("Glyphs", "&aGlyphs", genericLore);
+        saveVariation("BedBreakEffects", "&aBed Destroys", genericLore);
+        saveVariation("WoodSkins", "&aWood Skins", genericLore);
+        saveVariation("VictoryDances", "&aVictory Dances", genericLore);
+        saveVariation("IslandToppers", "&aIsland Toppers", genericLore);
+        saveVariation("ShopKeeperSkins", "&aShopKeeper Skins", genericLore);
+        saveVariation("DeathCries", "&aDeath Cries", genericLore);
 
         Utility.saveIfNotExistsLang("cosmetics.main-menu.Back.lore", Collections.singletonList("&cClick to close."));
         Utility.saveIfNotExistsLang("cosmetics.main-menu.Back.name", "&cBack");
 
         Utility.saveIfNotExistsLang("cosmetics.main-menu.Balance.lore", Arrays.asList("&7Your balance: &a{balance}", "", "&eClick to view your balance."));
         Utility.saveIfNotExistsLang("cosmetics.main-menu.Balance.name", "&aBalance");
+    }
+    
+    private static void saveVariation(String key, String name, List<String> lore) {
+        Utility.saveIfNotExistsLang("cosmetics.main-menu." + key + ".name", name);
+        Utility.saveIfNotExistsLang("cosmetics.main-menu." + key + ".lore", lore);
+        // Also save with hyphens just in case
+        String hyphenated = key.replaceAll("([a-z])([A-Z])", "$1-$2");
+        if (!hyphenated.equals(key)) {
+            Utility.saveIfNotExistsLang("cosmetics.main-menu." + hyphenated + ".name", name);
+            Utility.saveIfNotExistsLang("cosmetics.main-menu." + hyphenated + ".lore", lore);
+        }
     }
 
     public static String getOwnedTotal(Player p, CosmeticsType type) {
@@ -80,7 +84,6 @@ public class MainMenuUtils {
     public static List<String> formatLore(Player p, List<String> lore, String name) {
         if (lore == null) return new ArrayList<>();
         BwcAPI api = (BwcAPI) CosmeticsPlugin.getInstance().getApi();
-        String sanitized = name.toLowerCase().replace("-", "").replace("_", "").replace(" ", "");
 
         CosmeticsType type = CosmeticsType.fromName(name);
         String selectedStr = "";
@@ -97,13 +100,13 @@ public class MainMenuUtils {
             String s = line;
 
             if (type != null) {
-                // Unlocked count replacements (Standardized list for ALL tags)
+                // Unlocked count replacements
                 String[] ownedTags = {"{owned}", "{ownedSpray}", "{ownedspray}", "{ownedownerspary}", "{ownedsprays}", "{ownedpt}", "{ownedprojectiletrails}", "{ownedvd}", "{ownedvictorydances}", "{ownedfke}", "{ownedfinalkilleffects}", "{ownedit}", "{ownedislandtoppers}", "{ownedkm}", "{ownedkillmessages}", "{ownedbd}", "{ownedbedbreakeffects}", "{ownedws}", "{ownedwoodskin}", "{ownedwoodskins}", "{ownedgly}", "{ownedglyph}", "{ownedglyphs}", "{ownedsk}", "{ownedshopkeeper}", "{ownedshopkeeperskin}", "{ownedshopkeeperskins}", "{owneddc}", "{owneddeathcry}", "{owneddeathcries}", "{ownerspary}", "{ownedfinalkill}", "{ownedbbe}"};
                 for (String tag : ownedTags) {
                     s = s.replace(tag, ownedProgress);
                 }
 
-                // Selected name replacements (Standardized list for ALL tags)
+                // Selected name replacements
                 String[] selectedTags = {"{selected}", "{spraysselected}", "{spary}", "{spray}", "{sprays}", "{projectileselected}", "{projectiletrail}", "{projectile}", "{victorydanceselected}", "{victorydance}", "{victorydances}", "{finalkillselected}", "{finalkilleffect}", "{finalkill}", "{islandtopperselected}", "{islandtopper}", "{islandtoppers}", "{killmessageselected}", "{killmessage}", "{killmessages}", "{bedbreakselected}", "{bedbreak}", "{bedbreakeffect}", "{woodskin}", "{woodskins}", "{glyphsselected}", "{glyph}", "{glyphs}", "{shopkeeperselected}", "{shopkeeper}", "{shopkeeperskin}", "{shopkeeperskins}", "{deathcryselected}", "{deathcry}", "{deathcries}", "{victory}", "{killmsg}"};
                 for (String tag : selectedTags) {
                     s = s.replace(tag, selectedStr);

@@ -72,14 +72,17 @@ public class SprayPreview extends CosmeticPreview {
         }
 
         Location eyeLocation = playerLocation.clone().add(0, 1.6, 0);
-        Location firstBlock = eyeLocation.clone().add(playerLocation.getDirection().multiply(2));
-        firstBlock.getBlock().setType(Material.BARRIER);
-        firstBlock.getChunk().load(true);
+        Location barrierLoc = eyeLocation.clone().add(playerLocation.getDirection().multiply(2));
+        barrierLoc.getBlock().setType(Material.BARRIER);
+        barrierLoc.getChunk().load(true);
         
         // Correct fix for Spray Preview direction on 1.21.11
         // We spawn the ItemFrame on the face of the barrier block that points TOWARDS the player.
         BlockFace playerFacing = getCardinalDirection(playerLocation);
-        final ItemFrame frame = (ItemFrame) player.getWorld().spawnEntity(firstBlock.getBlock().getRelative(playerFacing).getLocation(), EntityType.ITEM_FRAME);
+        BlockFace frameFacing = playerFacing; // Changed from getOppositeFace() to flip it
+        
+        // Spawn frame at the barrier location, but set its facing to point towards the player.
+        final ItemFrame frame = (ItemFrame) player.getWorld().spawnEntity(barrierLoc, EntityType.ITEM_FRAME);
 
         final PacketAdapter adapter = new PacketAdapter(CosmeticsPlugin.getInstance(), PacketType.Play.Server.SPAWN_ENTITY) {
             @Override
@@ -92,7 +95,10 @@ public class SprayPreview extends CosmeticPreview {
         };
 
         CosmeticsPlugin.getInstance().getProtocolManager().addPacketListener(adapter);
-        frame.setFacingDirection(playerFacing, true);
+        
+        // Set facing direction towards player
+        frame.setFacingDirection(frameFacing, true);
+        
         SpraysUtil.spawnSprays(player, frame, true, (Spray) selected);
 
         XSound.ENTITY_SILVERFISH_HURT.play(player, 10f, 10f);
@@ -106,7 +112,7 @@ public class SprayPreview extends CosmeticPreview {
                 frame.setItem(new ItemStack(Material.AIR));
                 frame.remove();
             }
-            firstBlock.getBlock().setType(Material.AIR);
+            barrierLoc.getBlock().setType(Material.AIR);
             CosmeticsPlugin.getInstance().getProtocolManager().removePacketListener(adapter);
             CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, player);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);

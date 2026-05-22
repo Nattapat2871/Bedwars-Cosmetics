@@ -107,6 +107,9 @@ public class CategoryMenu extends ChestSystemGui {
             }
             // From language file
             String formattedName = Utility.getMSGLang(player, "cosmetics." + path + "name");
+            if (formattedName == null || formattedName.equals("cosmetics." + path + "name")) {
+                formattedName = StringUtils.replaceHyphensAndCaptalizeFirstLetter(id);
+            }
             List<String> lore = Utility.getListLang(player ,"cosmetics." + path + "lore");
             
             // Remove preview lore for Island Toppers
