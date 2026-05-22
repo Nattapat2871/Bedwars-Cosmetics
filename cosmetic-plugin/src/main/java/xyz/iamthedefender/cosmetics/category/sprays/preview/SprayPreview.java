@@ -79,8 +79,7 @@ public class SprayPreview extends CosmeticPreview {
         // Correct fix for Spray Preview direction on 1.21.11
         // We spawn the ItemFrame on the face of the barrier block that points TOWARDS the player.
         BlockFace playerFacing = getCardinalDirection(playerLocation);
-        BlockFace faceToPlayer = playerFacing.getOppositeFace();
-        final ItemFrame frame = (ItemFrame) player.getWorld().spawnEntity(firstBlock.getBlock().getRelative(faceToPlayer).getLocation(), EntityType.ITEM_FRAME);
+        final ItemFrame frame = (ItemFrame) player.getWorld().spawnEntity(firstBlock.getBlock().getRelative(playerFacing).getLocation(), EntityType.ITEM_FRAME);
 
         final PacketAdapter adapter = new PacketAdapter(CosmeticsPlugin.getInstance(), PacketType.Play.Server.SPAWN_ENTITY) {
             @Override
@@ -93,7 +92,7 @@ public class SprayPreview extends CosmeticPreview {
         };
 
         CosmeticsPlugin.getInstance().getProtocolManager().addPacketListener(adapter);
-        frame.setFacingDirection(faceToPlayer, true);
+        frame.setFacingDirection(playerFacing, true);
         SpraysUtil.spawnSprays(player, frame, true, (Spray) selected);
 
         XSound.ENTITY_SILVERFISH_HURT.play(player, 10f, 10f);
