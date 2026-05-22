@@ -72,17 +72,21 @@ public class SprayPreview extends CosmeticPreview {
         }
 
         Location eyeLocation = playerLocation.clone().add(0, 1.6, 0);
-        Location barrierLoc = eyeLocation.clone().add(playerLocation.getDirection().multiply(2));
+        
+        // กำหนดตำแหน่งสำหรับวาง Item Frame
+        Location frameLoc = eyeLocation.clone().add(playerLocation.getDirection().multiply(2));
+        
+        BlockFace playerFacing = getCardinalDirection(playerLocation);
+        BlockFace frameFacing = playerFacing.getOppositeFace(); 
+        
+        // ถอย Barrier ไปอยู่ด้านหลังของ Item Frame 1 บล็อก โดยอิงจากทิศที่ผู้เล่นมอง
+        Location barrierLoc = frameLoc.getBlock().getRelative(playerFacing).getLocation();
+        
         barrierLoc.getBlock().setType(Material.BARRIER);
         barrierLoc.getChunk().load(true);
         
-        // Correct fix for Spray Preview direction on 1.21.11
-        // We spawn the ItemFrame on the face of the barrier block that points TOWARDS the player.
-        BlockFace playerFacing = getCardinalDirection(playerLocation);
-        BlockFace frameFacing = playerFacing; // Changed from getOppositeFace() to flip it
-        
-        // Spawn frame at the barrier location, but set its facing to point towards the player.
-        final ItemFrame frame = (ItemFrame) player.getWorld().spawnEntity(barrierLoc, EntityType.ITEM_FRAME);
+        // เสก ItemFrame ที่ตำแหน่ง frameLoc ซึ่งจะเกาะกับ Barrier ที่อยู่ข้างหลังพอดี
+        final ItemFrame frame = (ItemFrame) player.getWorld().spawnEntity(frameLoc, EntityType.ITEM_FRAME);
 
         final PacketAdapter adapter = new PacketAdapter(CosmeticsPlugin.getInstance(), PacketType.Play.Server.SPAWN_ENTITY) {
             @Override
@@ -96,7 +100,6 @@ public class SprayPreview extends CosmeticPreview {
 
         CosmeticsPlugin.getInstance().getProtocolManager().addPacketListener(adapter);
         
-        // Set facing direction towards player
         frame.setFacingDirection(frameFacing, true);
         
         SpraysUtil.spawnSprays(player, frame, true, (Spray) selected);
@@ -112,6 +115,7 @@ public class SprayPreview extends CosmeticPreview {
                 frame.setItem(new ItemStack(Material.AIR));
                 frame.remove();
             }
+            // ลบ Barrier ออกจากตำแหน่งที่ถอยไปแล้ว
             barrierLoc.getBlock().setType(Material.AIR);
             CosmeticsPlugin.getInstance().getProtocolManager().removePacketListener(adapter);
             CosmeticsPlugin.getInstance().getVersionSupport().sendCameraPacket(player, player);
