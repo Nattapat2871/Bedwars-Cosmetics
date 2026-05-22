@@ -79,7 +79,8 @@ public class SprayPreview extends CosmeticPreview {
         // Correct fix for Spray Preview direction on 1.21.11
         // We spawn the ItemFrame on the face of the barrier block that points TOWARDS the player.
         BlockFace playerFacing = getCardinalDirection(playerLocation);
-        final ItemFrame frame = (ItemFrame) player.getWorld().spawnEntity(firstBlock.getBlock().getRelative(playerFacing).getLocation(), EntityType.ITEM_FRAME);
+        BlockFace faceToPlayer = playerFacing.getOppositeFace();
+        final ItemFrame frame = (ItemFrame) player.getWorld().spawnEntity(firstBlock.getBlock().getRelative(faceToPlayer).getLocation(), EntityType.ITEM_FRAME);
 
         final PacketAdapter adapter = new PacketAdapter(CosmeticsPlugin.getInstance(), PacketType.Play.Server.SPAWN_ENTITY) {
             @Override
@@ -92,7 +93,7 @@ public class SprayPreview extends CosmeticPreview {
         };
 
         CosmeticsPlugin.getInstance().getProtocolManager().addPacketListener(adapter);
-        frame.setFacingDirection(playerFacing, true);
+        frame.setFacingDirection(faceToPlayer, true);
         SpraysUtil.spawnSprays(player, frame, true, (Spray) selected);
 
         XSound.ENTITY_SILVERFISH_HURT.play(player, 10f, 10f);
@@ -114,22 +115,13 @@ public class SprayPreview extends CosmeticPreview {
     }
 
     public static BlockFace getCardinalDirection(Location location) {
-        double yaw = location.getYaw();
-
-        if (yaw < 0) {
-            yaw += 360;
-        }
-
-        if (yaw >= 315 || yaw < 45) {
-            return BlockFace.SOUTH;
-        } else if (yaw >= 45 && yaw < 135) {
-            return BlockFace.WEST;
-        } else if (yaw >= 135 && yaw < 225) {
-            return BlockFace.NORTH;
-        } else if (yaw >= 225) {
-            return BlockFace.EAST;
-        } else {
-            return BlockFace.SELF;
-        }
+        float yaw = location.getYaw();
+        if (yaw < 0) yaw += 360;
+        yaw %= 360;
+        if (yaw <= 45 || yaw >= 315) return BlockFace.SOUTH;
+        if (yaw > 45 && yaw < 135) return BlockFace.WEST;
+        if (yaw >= 135 && yaw <= 225) return BlockFace.NORTH;
+        if (yaw > 225 && yaw < 315) return BlockFace.EAST;
+        return BlockFace.SOUTH;
     }
 }
