@@ -82,7 +82,7 @@ public class CosmeticsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getLogger().info("Cosmetics v1.4.10 (Raphael Build) is enabling...");
+        getLogger().info("Cosmetics v" + getDescription().getVersion() + " (Nattapat2871 Build) is enabling...");
         instance = this;
         api = new BwcAPI();
         previewList = new ArrayList<>();
