@@ -77,7 +77,12 @@ public class TwerkApocalypseDance extends VictoryDance {
             if (loc.getBlock().getType() == Material.AIR && loc.subtract(0,1,0).getBlock().getType() != Material.AIR) {
                 NPC npc = registry.createNPC(EntityType.PLAYER, winner.getDisplayName());
 
-                npc.getOrAddTrait(SkinTrait.class).setSkinName(winner.getName(), true);
+                String[] skin = Utility.getFromPlayer(winner);
+                if (skin != null) {
+                    npc.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), skin[1], skin[0]);
+                } else {
+                    npc.getOrAddTrait(SkinTrait.class).setSkinName(winner.getName(), true);
+                }
 
                 npc.getOrAddTrait(LookClose.class).lookClose(false);
                 npc.spawn(loc.add(0,1,0));

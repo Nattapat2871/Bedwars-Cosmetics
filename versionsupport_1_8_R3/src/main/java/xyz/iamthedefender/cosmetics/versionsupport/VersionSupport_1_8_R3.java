@@ -50,6 +50,20 @@ public class VersionSupport_1_8_R3 implements IVersionSupport {
     }
 
     @Override
+    public ItemStack getSkull(Player player) {
+        ItemStack head = XMaterial.PLAYER_HEAD.parseItem();
+        if(head == null) return null;
+
+        ItemMeta itemMeta = head.getItemMeta();
+        if (itemMeta instanceof org.bukkit.inventory.meta.SkullMeta) {
+            org.bukkit.inventory.meta.SkullMeta skullMeta = (org.bukkit.inventory.meta.SkullMeta) itemMeta;
+            skullMeta.setOwner(player.getName());
+            head.setItemMeta(skullMeta);
+        }
+        return head;
+    }
+
+    @Override
     public @NotNull ItemStack applyRenderer(MapRenderer mapRenderer, MapView mapView) {
         ItemStack map = XMaterial.FILLED_MAP.parseItem();
         mapView.getRenderers().forEach(mapView::removeRenderer);

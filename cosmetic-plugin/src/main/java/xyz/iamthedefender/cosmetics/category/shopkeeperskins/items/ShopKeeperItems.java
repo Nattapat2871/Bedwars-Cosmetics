@@ -43,11 +43,16 @@ public class ShopKeeperItems {
 
                 @Override
                 public String getDisplayName() {
-                    return StringUtils.replaceHyphensAndCaptalizeFirstLetter(id);
+                    String name = config.getString(path + "name");
+                    return name != null ? name : StringUtils.replaceHyphensAndCaptalizeFirstLetter(id);
                 }
 
                 @Override
                 public List<String> getLore() {
+                    List<String> lore = config.getYml().getStringList(path + "lore");
+                    if (lore != null && !lore.isEmpty()) {
+                        return lore;
+                    }
                     if (getRarity() == RarityType.NONE) {
                         return List.of("&7Selecting this option disables your", "&7ShopKeeper Skin.");
                     }

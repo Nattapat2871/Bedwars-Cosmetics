@@ -81,7 +81,12 @@ public class ShopKeeperSkinsUtils {
         npc.setName("&r");
 
         if (mirror) {
-            npc.getOrAddTrait(SkinTrait.class).setSkinName(p.getName(), true);
+            String[] skin = Utility.getFromPlayer(p);
+            if (skin != null) {
+                npc.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), skin[1], skin[0]);
+            } else {
+                npc.getOrAddTrait(SkinTrait.class).setSkinName(p.getName(), true);
+            }
         } else {
             npc.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), sign, value);
         }
@@ -124,7 +129,12 @@ public class ShopKeeperSkinsUtils {
         }
 
         if (mirror) {
-            npc.getOrAddTrait(SkinTrait.class).setSkinName(p.getName(), true);
+            String[] skin = Utility.getFromPlayer(p);
+            if (skin != null) {
+                npc.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), skin[1], skin[0]);
+            } else {
+                npc.getOrAddTrait(SkinTrait.class).setSkinName(p.getName(), true);
+            }
         } else {
             npc.getOrAddTrait(SkinTrait.class).setSkinPersistent(UUID.randomUUID().toString(), sign, value);
         }

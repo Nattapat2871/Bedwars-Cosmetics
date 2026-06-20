@@ -17,6 +17,8 @@ public interface IVersionSupport {
 
     ItemStack getSkull(String base64);
 
+    ItemStack getSkull(Player player);
+
     @NotNull
     ItemStack applyRenderer(MapRenderer mapRenderer, MapView mapView);
 

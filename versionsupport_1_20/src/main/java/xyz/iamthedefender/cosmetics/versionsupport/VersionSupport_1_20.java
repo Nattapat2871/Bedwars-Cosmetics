@@ -51,6 +51,42 @@ public class VersionSupport_1_20 implements IVersionSupport {
     }
 
     @Override
+    public ItemStack getSkull(Player player) {
+        String skin = null;
+        
+        // 1. ลองดึงสกินโดยตรงจาก Profile ของผู้เล่นผ่าน Reflection (รองรับทั้งไอดีแท้และไอดีเถื่อนที่ผ่าน Bungee/Velocity)
+        if (player != null) {
+            try {
+                Object profile = player.getClass().getMethod("getPlayerProfile").invoke(player);
+                java.util.Collection<?> properties = (java.util.Collection<?>) profile.getClass().getMethod("getProperties").invoke(profile);
+                for (Object prop : properties) {
+                    String propName = (String) prop.getClass().getMethod("getName").invoke(prop);
+                    if (propName.equalsIgnoreCase("textures")) {
+                        skin = (String) prop.getClass().getMethod("getValue").invoke(prop);
+                        break;
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
+        // 2. ถ้าได้สกินมา ให้ใช้ XSkull สร้างหัว
+        if (skin != null) {
+            return getSkull(skin);
+        }
+
+        // 3. Fallback: ถ้าไม่ได้สกิน (เช่น ผู้เล่น offline หรือดึงไม่ได้) ให้ใช้ชื่อผู้เล่นแทน
+        ItemStack head = XMaterial.PLAYER_HEAD.parseItem();
+        if (head == null) return null;
+        
+        ItemMeta meta = head.getItemMeta();
+        if (meta instanceof org.bukkit.inventory.meta.SkullMeta skullMeta) {
+            skullMeta.setOwningPlayer(player);
+            head.setItemMeta(skullMeta);
+        }
+        return head;
+    }
+
+    @Override
     public @NotNull ItemStack applyRenderer(MapRenderer mapRenderer, MapView mapView) {
         ItemStack map = XMaterial.FILLED_MAP.parseItem();
         mapView.getRenderers().forEach(mapView::removeRenderer);

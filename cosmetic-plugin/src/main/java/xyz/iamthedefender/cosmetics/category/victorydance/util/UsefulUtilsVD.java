@@ -99,6 +99,10 @@ public class UsefulUtilsVD
     public static ItemStack gethead(final String value) {
         return CosmeticsPlugin.getInstance().getApi().getVersionSupport().getSkull(value);
     }
+
+    public static ItemStack gethead(final Player player) {
+        return CosmeticsPlugin.getInstance().getApi().getVersionSupport().getSkull(player);
+    }
     
     public static void launch(final Player player, final double distOverHead, final double distToFacing, final Class<? extends Projectile> projectileClass) {
         final Location start = player.getLocation().add(0.0, distOverHead, 0.0);

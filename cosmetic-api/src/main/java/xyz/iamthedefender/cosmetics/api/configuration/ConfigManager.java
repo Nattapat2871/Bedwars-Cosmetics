@@ -108,10 +108,15 @@ public class ConfigManager {
             String[] data = getString(path).split(":", 2);
             material = data[0];
             if (material.equalsIgnoreCase("player_head") || material.equalsIgnoreCase("skull_item")){
-                String[] data2 = getString(path).split(":", 3);
-                String base64 = data2[2];
-                item = getCustomSkull(base64);
-                return item;
+                String[] data2 = getString(path).split(":");
+                if (data2.length >= 3) {
+                    String base64 = data2[2];
+                    item = getCustomSkull(base64);
+                    return item;
+                } else {
+                    item = XMaterial.PLAYER_HEAD.parseItem();
+                    return item;
+                }
             }
             int damage = Integer.parseInt(data[1]);
             item = XMaterial.matchXMaterial(material.toUpperCase()).get().parseItem();

@@ -102,11 +102,41 @@ public class Utility {
 
 
     /**
+     * Get skin of a player from their object (real-time session skin)
+     * @param p player object
+     * @return String[]{texture, signature}
+     */
+    public static String[] getFromPlayer(Player p) {
+        if (p == null) return null;
+        try {
+            // ดึงข้อมูลผ่าน Profile API แบบ Reflection (รองรับ Bungee/Velocity session skin)
+            Object profile = p.getClass().getMethod("getPlayerProfile").invoke(p);
+            java.util.Collection<?> properties = (java.util.Collection<?>) profile.getClass().getMethod("getProperties").invoke(profile);
+            for (Object prop : properties) {
+                String propName = (String) prop.getClass().getMethod("getName").invoke(prop);
+                if (propName.equalsIgnoreCase("textures")) {
+                    String propValue = (String) prop.getClass().getMethod("getValue").invoke(prop);
+                    String propSign = (String) prop.getClass().getMethod("getSignature").invoke(prop);
+                    return new String[]{propValue, propSign};
+                }
+            }
+        } catch (Exception ignored) {}
+        
+        return getFromName(p.getName());
+    }
+
+    /**
      * Get skin of a player from their name
      * @param name name of the player
      * @return String[]{texture, signature}
      */
     public static String[] getFromName(String name) {
+        Player onlinePlayer = Bukkit.getPlayer(name);
+        if (onlinePlayer != null) {
+             String[] skin = getFromPlayer(onlinePlayer);
+             if (skin != null) return skin;
+        }
+
         // Try SkinsRestorer first
         if (Bukkit.getPluginManager().isPluginEnabled("SkinsRestorer")) {
             try {

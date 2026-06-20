@@ -97,6 +97,11 @@ public class CategoryMenu extends ChestSystemGui {
             String path = cosmeticsType.getSectionKey() + "." + id + ".";
 
             ItemStack stack = configManager.getItemStack(path + "item");
+            
+            // Dynamic Player Head for Mirror Skin
+            if (cosmeticsType == CosmeticsType.ShopKeeperSkins && id.equalsIgnoreCase("mirror")) {
+                stack = CosmeticsPlugin.getInstance().getVersionSupport().getSkull(player);
+            }
             int price = config.getInt(path + "price");
             String rarityStr = config.getString(path + "rarity");
             RarityType rarity = RarityType.COMMON;

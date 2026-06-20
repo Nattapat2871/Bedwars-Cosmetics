@@ -14,6 +14,7 @@ import org.bukkit.map.MapView;
 import xyz.iamthedefender.cosmetics.CosmeticsPlugin;
 import xyz.iamthedefender.cosmetics.api.configuration.ConfigManager;
 import xyz.iamthedefender.cosmetics.api.cosmetics.FieldsType;
+import xyz.iamthedefender.cosmetics.api.cosmetics.RarityType;
 import xyz.iamthedefender.cosmetics.api.cosmetics.category.Spray;
 import xyz.iamthedefender.cosmetics.api.handler.IArenaHandler;
 import xyz.iamthedefender.cosmetics.api.particle.ParticleWrapper;
@@ -42,6 +43,13 @@ public class SpraysUtil
      */
     public static void spawnSprays(Player player, ItemFrame itemFrame, boolean isPreview, Spray selectedSpray) {
         Run.sync(() -> {
+            if (selectedSpray.getRarity() == RarityType.NONE && !isPreview) {
+                // Clear the item frame if "None" is selected
+                itemFrame.setItem(null);
+                player.sendMessage(ColorUtil.translate("&eSpray removed!"));
+                return;
+            }
+
             MapView view = Bukkit.createMap(player.getWorld());
 
             ConfigManager config = ConfigUtils.getSprays();
